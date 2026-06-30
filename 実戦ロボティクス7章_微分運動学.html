@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>実戦ロボティクス7章 微分運動学 内容まとめ</title>
+  <style>
+    :root {
+      --bg: #080808;
+      --paper: #111112;
+      --paper-2: #171719;
+      --ink: #f4f0e8;
+      --muted: #b9b3a7;
+      --dim: #7c766d;
+      --rule: rgba(244, 240, 232, .16);
+      --accent: #d5a857;
+      --accent-2: #7fb6ff;
+      --danger: #ff8f70;
+      --max: 1120px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Gelasio", "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif;
+      line-height: 1.82;
+      letter-spacing: 0;
+    }
+    .page {
+      width: min(var(--max), calc(100vw - 40px));
+      margin: 0 auto;
+    }
+    header {
+      min-height: 72vh;
+      display: grid;
+      align-items: end;
+      padding: 80px 0 56px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .kicker {
+      color: var(--accent);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 24px;
+    }
+    h1 {
+      margin: 0;
+      max-width: 980px;
+      font-size: clamp(44px, 8vw, 88px);
+      line-height: .98;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+    .thesis {
+      max-width: 920px;
+      margin-top: 30px;
+      font-size: clamp(20px, 2.5vw, 30px);
+      line-height: 1.55;
+      color: var(--ink);
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 30px;
+    }
+    .chip {
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      color: var(--muted);
+      font-size: 13px;
+      background: rgba(255,255,255,.035);
+    }
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      display: flex;
+      gap: 8px;
+      padding: 12px 0;
+      margin-bottom: 38px;
+      background: rgba(8,8,8,.86);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--rule);
+      overflow-x: auto;
+    }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      white-space: nowrap;
+      padding: 7px 10px;
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      font-size: 14px;
+    }
+    nav a:hover { color: var(--ink); }
+    section {
+      padding: 42px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .section-label {
+      color: var(--accent);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      font-size: 13px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    h2 {
+      margin: 0 0 24px;
+      font-size: clamp(32px, 5vw, 56px);
+      line-height: 1.08;
+      font-weight: 650;
+    }
+    h3 {
+      margin: 36px 0 10px;
+      font-size: clamp(23px, 3vw, 34px);
+      line-height: 1.22;
+    }
+    h4 {
+      margin: 28px 0 8px;
+      font-size: 22px;
+      color: var(--ink);
+    }
+    h5, h6 {
+      margin: 22px 0 6px;
+      font-size: 18px;
+      color: var(--accent);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+    }
+    p {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+    strong { color: var(--ink); font-weight: 700; }
+    em { color: var(--ink); font-style: normal; }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .summary-card {
+      padding: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+    }
+    .summary-card h3 {
+      margin-top: 0;
+      color: var(--ink);
+      font-size: 25px;
+    }
+    .equation-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 26px 0 8px;
+    }
+    .equation {
+      padding: 16px;
+      border: 1px solid rgba(213,168,87,.35);
+      background: rgba(213,168,87,.08);
+      border-radius: 4px;
+      color: var(--ink);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .core {
+      background: var(--paper);
+      margin: 0 calc(50% - 50vw);
+      padding-left: max(20px, calc((100vw - var(--max)) / 2));
+      padding-right: max(20px, calc((100vw - var(--max)) / 2));
+    }
+    .core-inner {
+      max-width: 920px;
+    }
+    .core-body {
+      margin-top: 26px;
+      padding: 26px;
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+    }
+    .core-body ul {
+      margin: 0 0 18px 1.2em;
+      padding: 0;
+      color: var(--muted);
+    }
+    .core-body li { margin: 8px 0; }
+    .core-body hr {
+      border: 0;
+      border-top: 1px solid var(--rule);
+      margin: 34px 0;
+    }
+    .math {
+      color: #d8e9ff;
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      background: rgba(127,182,255,.12);
+      border: 1px solid rgba(127,182,255,.25);
+      border-radius: 4px;
+      padding: 0 5px;
+      white-space: nowrap;
+    }
+    .dot {
+      position: relative;
+      display: inline-block;
+      padding-top: .18em;
+      line-height: 1;
+    }
+    .dot::before {
+      content: ".";
+      position: absolute;
+      left: 50%;
+      top: -.38em;
+      transform: translateX(-50%);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .bar {
+      text-decoration: overline;
+      text-decoration-thickness: .08em;
+    }
+    .quiz-panel {
+      margin: 30px 0 34px;
+      padding: 26px;
+      background: linear-gradient(180deg, rgba(127,182,255,.10), rgba(255,255,255,.035));
+      border: 1px solid rgba(127,182,255,.24);
+      border-radius: 6px;
+    }
+    .quiz-panel > p {
+      max-width: 760px;
+    }
+    .quiz-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 22px;
+    }
+    .quiz-card {
+      min-width: 0;
+      padding: 20px;
+      background: rgba(8, 8, 8, .48);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+    }
+    .quiz-number {
+      color: var(--accent);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      font-size: 13px;
+      letter-spacing: .08em;
+    }
+    .quiz-card h3 {
+      margin: 8px 0 10px;
+      font-size: 21px;
+      line-height: 1.3;
+    }
+    .quiz-question {
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.68;
+    }
+    .quiz-choices {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px;
+    }
+    .quiz-choice {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      background: rgba(255,255,255,.035);
+      color: var(--muted);
+      font: inherit;
+      font-size: 15px;
+      line-height: 1.58;
+      text-align: left;
+      cursor: pointer;
+    }
+    .quiz-choice:hover, .quiz-choice:focus-visible {
+      border-color: rgba(213,168,87,.65);
+      color: var(--ink);
+      outline: none;
+    }
+    .choice-mark {
+      display: inline-grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--rule);
+      border-radius: 50%;
+      color: var(--accent);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      font-size: 13px;
+    }
+    .quiz-card.answered .quiz-choice {
+      cursor: default;
+    }
+    .quiz-choice.is-correct {
+      border-color: rgba(127, 214, 163, .7);
+      background: rgba(127, 214, 163, .10);
+      color: var(--ink);
+    }
+    .quiz-choice.is-wrong {
+      border-color: rgba(255,143,112,.7);
+      background: rgba(255,143,112,.10);
+      color: var(--ink);
+    }
+    .quiz-feedback {
+      display: none;
+      margin-top: 14px;
+      padding: 14px;
+      border-left: 3px solid var(--accent);
+      background: rgba(213,168,87,.08);
+    }
+    .quiz-feedback.is-visible {
+      display: block;
+    }
+    .feedback-label {
+      margin-bottom: 6px;
+      color: var(--ink);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .quiz-feedback p {
+      margin-bottom: 0;
+      font-size: 15px;
+      line-height: 1.72;
+    }
+    footer {
+      padding: 34px 0 52px;
+      color: var(--dim);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      font-size: 13px;
+    }
+    @media (max-width: 840px) {
+      .page { width: min(100vw - 32px, var(--max)); }
+      header { min-height: 62vh; padding-top: 48px; }
+      .summary-grid, .equation-strip, .quiz-grid { grid-template-columns: 1fr; }
+      .core-body { padding: 18px; }
+      .quiz-panel { padding: 18px; }
+      p { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div>
+        <div class="kicker">Chapter 7 / Differential Kinematics</div>
+        <h1>実戦ロボティクス7章<br>微分運動学</h1>
+        <p class="thesis">微分運動学は、望む手先速度を実現する関節速度へ翻訳し、特異姿勢と冗長性を扱いながらロボットを安定に動かすための実用的な枠組みである。</p>
+        <div class="meta">
+          <span class="chip">visual-html-renderer information design</span>
+          <span class="chip">editorial dark</span>
+          <span class="chip">要約 + コア内容</span>
+          <span class="chip">generated 2026-06-29 16:34</span>
+        </div>
+      </div>
+    </header>
+    <nav aria-label="ページ内ナビゲーション">
+      <a href="#summary">要約</a>
+      <a href="#core">コア内容</a>
+      <a href="#quiz">10問クイズ</a>
+    </nav>
+    <section id="summary">
+      <div class="section-label">Summary</div>
+      <h2>要約</h2>
+      <div class="equation-strip" aria-label="章の主要式">
+        <div class="equation"><span class="math">v = J(q) <span class="dot">q</span></span></div>
+        <div class="equation"><span class="math"><span class="dot">q</span> = J<sup>+</sup>v + (I - J<sup>+</sup>J)k</span></div>
+        <div class="equation"><span class="math">w = √(det(JJ<sup>T</sup>))</span></div>
+      </div>
+      <div class="summary-grid">
+        <article class="summary-card"><h3>微分運動学とは</h3><p>第6章では、関節速度から手先速度を求めました。第7章では逆に、手先をこう動かしたいとき、関節をどう動かせばよいかを考えます。</p>
+<p>基本式は <span class="math">v = J(q) <span class="dot">q</span></span> です。<span class="math"><span class="dot">q</span></span> は関節速度、<span class="math">v</span> は手先速度、<span class="math">J(q)</span> はヤコビ行列です。</p>
+<p>物理的には、ヤコビ行列はモーターの速度指令を手先の速度へ変換する対応表です。</p></article>
+<article class="summary-card"><h3>特異姿勢と可操作度</h3><p>特異姿勢とは、ヤコビ行列の行や列が独立でなくなり、ある方向の手先速度を作れなくなる姿勢です。</p>
+<p>平面2自由度ロボットでは <span class="math">det J = l<sub>1</sub> l<sub>2</sub> sinθ<sub>2</sub></span> なので、<span class="math">θ<sub>2</sub> = 0</span> または <span class="math">π</span> のとき <span class="math">det J = 0</span> となり、腕が伸び切った姿勢や折りたたまれた姿勢で動かせない方向が生まれます。</p>
+<p>可操作度 <span class="math">w = |det J|</span>、一般には <span class="math">w = √(det(JJ<sup>T</sup>))</span> で表し、小さな関節速度で手先をどれだけ自由に動かせるかを測ります。</p></article>
+<article class="summary-card"><h3>速度制御と誤差収束</h3><p>関節が速度指令 <span class="math">u<sub>i</sub></span> に従うと考えると <span class="math"><span class="dot">q</span><sub>i</sub> = u<sub>i</sub></span> です。</p>
+<p>制御入力を <span class="math">u<sub>i</sub> = <span class="dot">q</span><sub>id</sub> + K<sub>i</sub>(q<sub>id</sub> - q<sub>i</sub>)</span> と置くと、目標速度で進みながら位置誤差も戻す制御になります。</p>
+<p>誤差 <span class="math">e<sub>i</sub> = q<sub>i</sub> - q<sub>id</sub></span> と置くと <span class="math"><span class="dot">e</span><sub>i</sub> + K<sub>i</sub> e<sub>i</sub> = 0</span> となり、<span class="math">K<sub>i</sub> &gt; 0</span> なら誤差は指数関数的に0へ近づきます。</p></article>
+<article class="summary-card"><h3>微分逆運動学と疑似逆行列</h3><p>手先速度 <span class="math">v</span> を実現したいとき、<span class="math">v = J<span class="dot">q</span></span> を <span class="math"><span class="dot">q</span></span> について解きます。<span class="math">J</span> が正方で逆行列を持つなら <span class="math"><span class="dot">q</span> = J<sup>-1</sup>v</span> です。</p>
+<p>自由度が多い場合、解は無数にあります。その中で関節速度の大きさ <span class="math">||<span class="dot">q</span>||</span> が最小になる解を選ぶために疑似逆行列 <span class="math">J<sup>+</sup></span> を使います。</p>
+<p>冗長ロボットでよく使う形は <span class="math">J<sup>+</sup> = J<sup>T</sup>(JJ<sup>T</sup>)<sup>-1</sup></span> で、<span class="math"><span class="dot">q</span> = J<sup>+</sup>v</span> と書けます。</p></article>
+<article class="summary-card"><h3>零空間運動と安定化</h3><p>自由度が余っているロボットでは、手先速度を変えずに関節だけを動かす余地があります。</p>
+<p>一般解 <span class="math"><span class="dot">q</span> = J<sup>+</sup>v + (I - J<sup>+</sup>J)k</span> の第2項は零空間運動で、手先速度に影響しない動きです。</p>
+<p>特異姿勢に近いと逆行列が不安定になるため、<span class="math"><span class="dot">q</span> = (J<sup>T</sup>J + ε I)<sup>-1</sup>J<sup>T</sup>v</span> のような減衰項を入れて、精度より安定性を優先することがあります。</p></article>
+<article class="summary-card"><h3>反復的な逆運動学</h3><p>位置の逆運動学を直接解くのが難しい場合、誤差 <span class="math">e(q) = p - f(q)</span> を少しずつ0に近づけます。</p>
+<p>現在の仮の解 <span class="math"><span class="bar">q</span></span> から <span class="math">Δ q</span> だけ動かすと、一次近似により <span class="math">e(<span class="bar">q</span> + Δ q) ≈ e(<span class="bar">q</span>) + (∂ e / ∂ q<sup>T</sup>)Δ q</span> です。</p>
+<p><span class="math">∂ e / ∂ q<sup>T</sup> = -J</span> なので、<span class="math">Δ q = J<sup>-1</sup>e(<span class="bar">q</span>)</span> のように修正できます。これはニュートン・ラフソン法です。</p></article>
+      </div>
+    </section>
+  </div>
+  <section class="core" id="core">
+    <div class="page core-inner">
+      <div class="section-label">Core Content</div>
+      <h2>コア内容</h2>
+      <p>提示されたTXTの内容を、見出し・箇条書き・数式表記が読みやすいようにHTML化しています。</p>
+      <section class="quiz-panel" id="quiz" aria-labelledby="quiz-title">
+        <div class="section-label">Quiz</div>
+        <h2 id="quiz-title">10問クイズ</h2>
+        <p>各問の選択肢を選ぶと、正解と詳細解説が表示されます。微分運動学を「式の暗記」ではなく、現場で使える判断として理解できているかを確認できます。</p>
+        <div class="quiz-grid">
+          
+            <article class="quiz-card" data-answer="0">
+              <div class="quiz-number">Q01</div>
+              <h3>姿勢による「感度」の変化</h3>
+              <p class="quiz-question">ヤコビ行列 J(q) がロボットの姿勢 q の関数である、という事実は何を表しているでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q1の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>同じ関節速度でも、姿勢によって手先の動きやすい方向と動きにくい方向が変わる。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>どの姿勢でも、関節速度と手先速度の対応は常に同じである。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>ヤコビ行列は関節の角度ではなく、モータの電圧だけで決まる。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>ヤコビ行列の各要素は、ある関節を少し動かしたときに手先速度の各成分へどれだけ伝わるかを表す伝達比です。腕を伸ばした姿勢、曲げた姿勢、肘の向きが違う姿勢では、同じ関節速度でも手先が動きやすい方向が変わります。つまり J(q) は、その瞬間の姿勢における「速度のレバー比の地図」です。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card" data-answer="0">
+              <div class="quiz-number">Q02</div>
+              <h3>特異姿勢における速度の爆発</h3>
+              <p class="quiz-question">特異姿勢の近くで逆運動学を解くと、なぜ関節速度が非常に大きくなりやすいのでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q2の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>その方向へ手先を動かす能力が小さくなり、少しの手先速度を作るにも大きな関節速度が必要になるから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>特異姿勢ではモータの最大出力が自動的に大きくなるから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>ヤコビ行列を使うと、どんな姿勢でも必ず関節速度が無限大になるから。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>特異姿勢ではヤコビ行列のランクが落ち、手先を動かせない、または非常に動かしにくい方向が生まれます。数学的には逆行列や疑似逆行列の値が大きくなり、物理的には「その方向へ進むためのレバー比がほぼゼロ」に近づきます。そのため、有限の手先速度を作ろうとしても、計算上は非常に大きな関節速度が必要になります。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card" data-answer="0">
+              <div class="quiz-number">Q03</div>
+              <h3>冗長性と零空間</h3>
+              <p class="quiz-question">手先位置を保ったまま肘だけを動かすような動作は、微分運動学ではどの成分として表されるでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q3の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>一般解 <span class="math"><span class="dot">q</span> = J<sup>+</sup>v + (I - J<sup>+</sup>J)k</span> の第2項、つまり零空間成分。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>可操作度 <span class="math">w = √(det(JJ<sup>T</sup>))</span> そのもの。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>位置誤差 e を常にゼロにする比例ゲイン K の成分。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p><span class="math">(I - J<sup>+</sup>J)k</span> は <span class="math">J</span> を掛けると 0 になる方向の関節速度です。つまり関節は動いているのに、手先速度 <span class="math">v</span> には影響しません。この余った自由度を使うと、作業点を保ったまま肘の向きを変えたり、障害物や関節限界を避けたりできます。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card" data-answer="0">
+              <div class="quiz-number">Q04</div>
+              <h3>ニュートン・ラプソン法の限界</h3>
+              <p class="quiz-question">ヤコビ行列を使う反復的な逆運動学で、初期値が悪いと解が求まらない主な理由は何でしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q4の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>現在姿勢まわりの一次近似を使うため、真の解から遠いと修正方向が外れやすいから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>ニュートン・ラプソン法は必ず一回の計算で正解に到達する方法だから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>初期値は計算結果にまったく影響しないから。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>ニュートン・ラプソン法は、現在の姿勢の近くでは関数を直線で近似できる、という考えに立っています。解が遠い場合や途中に特異姿勢がある場合、この直線近似が現実の曲がった関係をうまく表せません。その結果、誤差を減らすつもりの更新が逆に発散することがあります。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card" data-answer="0">
+              <div class="quiz-number">Q05</div>
+              <h3>レーベンバーグ・マルカート法の代償</h3>
+              <p class="quiz-question">特異点付近で減衰項を入れて計算を安定させると、どのような代償が生じますか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q5の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>関節速度の暴走を抑えられる一方、手先が目標軌道から少し外れることがある。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>安定性も精度も必ず完全になり、代償はない。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>ヤコビ行列を一切使わなくてもよくなる。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>減衰項は、逆行列計算が過敏になりすぎるのを抑えるための正則化です。これは安全性と数値安定性を高めますが、厳密に目標速度を満たす解からは少し離れます。現場では「軌道を完全に守る」よりも「計算やモータを破綻させない」ことを優先する局面があります。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card" data-answer="0">
+              <div class="quiz-number">Q06</div>
+              <h3>基礎ヤコビ行列と解析的ヤコビ行列</h3>
+              <p class="quiz-question">角速度ベクトルを使う基礎ヤコビ行列と、オイラー角などの時間微分を使う解析的ヤコビ行列の違いとして適切なのはどれでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q6の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>オイラー角の微分はそのまま角速度ではなく、姿勢表現に由来する特異性を持つことがある。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>両者は名前が違うだけで、姿勢表現による違いは一切ない。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>基礎ヤコビ行列は位置だけを扱い、姿勢とは無関係である。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>角速度は物体の回転の物理量ですが、ロール・ピッチ・ヨー角などの姿勢パラメータの微分は、その座標表現に依存します。特にオイラー角にはジンバルロックのような表現上の特異性があります。基礎ヤコビ行列は角速度ベクトルを使うため、リンクの幾何から実装しやすい形で導出できます。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card" data-answer="0">
+              <div class="quiz-number">Q07</div>
+              <h3>可操作性指標の意味</h3>
+              <p class="quiz-question">可操作性 <span class="math">w = √(det(JJ<sup>T</sup>))</span> が小さい姿勢では、作業設計上どのような注意が必要でしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q7の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>手先を動かしにくい方向があるため、精密作業や高速動作をその姿勢付近に置かないようにする。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>可操作性が小さいほど、すべての方向へ同じように動きやすい。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>可操作性は表示用の数値で、作業配置には関係しない。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>可操作性は、関節速度の余裕が手先速度としてどれだけ多方向に使えるかを表します。値が小さいほど、ある方向に動かしにくく、同じ手先速度を出すために大きな関節速度が必要になります。したがって精密な接触作業や速い移動は、可操作性が高い姿勢領域に配置する方が安全です。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card" data-answer="0">
+              <div class="quiz-number">Q08</div>
+              <h3>重み行列 W の役割</h3>
+              <p class="quiz-question">位置誤差と姿勢誤差を同時に扱うとき、重み行列 W を導入する目的として正しいのはどれでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q8の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>メートルとラジアンのように単位や重要度が異なる誤差を、比較・調整できるようにする。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>重み行列を入れると、すべての誤差が物理的に消滅する。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>重み行列は特異姿勢を機械構造から取り除く部品である。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>位置はメートル、姿勢はラジアンで表され、数値の意味が異なります。そのまま足し合わせると、どちらの誤差を優先しているのか曖昧になります。W はスケールをそろえたり、「位置は厳密に、姿勢は少し許す」といったタスク上の優先順位を式に入れるための道具です。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card" data-answer="0">
+              <div class="quiz-number">Q09</div>
+              <h3>軌道計画と微分逆運動学の切り分け</h3>
+              <p class="quiz-question">ロボットが振動して動くとき、第3章の軌道生成と第7章の微分逆運動学のどちらに原因があるかを見分ける観点はどれでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q9の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>目標軌道自体が滑らかか、または滑らかな目標なのに関節指令だけが特異点付近で跳ねているかを見る。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>振動があれば必ず軌道生成だけが原因だと決める。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>振動があれば必ずモータの色や外観が原因だと判断する。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>軌道生成が悪い場合、目標位置・速度・加速度そのものに不連続や急変が含まれます。一方、目標軌道は滑らかなのに、ヤコビ行列の逆計算で関節速度が急に大きくなるなら、第7章の微分逆運動学、特に特異点近傍の数値安定性が疑われます。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card" data-answer="0">
+              <div class="quiz-number">Q10</div>
+              <h3>動力学を無視できても微分運動学は省けるか</h3>
+              <p class="quiz-question">高減速比モータで動力学の影響を小さくできる場合、微分運動学の計算も同じように省略できるでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q10の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>省略できない。関節速度と手先速度の幾何学的関係は、モータ性能では消えないから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>完全に省略できる。高減速比なら手先座標系の計算は不要になる。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>省略できるかどうかは、ヤコビ行列ではなく電源ケーブルの長さだけで決まる。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>高減速比や高ゲイン制御は、重力・慣性・遠心力などの動力学的な影響を小さく見せることがあります。しかし微分運動学は、関節が少し動くと手先がどちらへどれだけ動くかという幾何学的な関係です。手先座標系で作業を指定する限り、J(q) による変換は必要です。</p>
+              </div>
+            </article>
+            
+        </div>
+      </section>
+      <div class="core-body">
+        <p>第7章「微分運動学」に基づき、ロボット制御の専門家が実務で不可欠とする5つの核となるメンタルモデルを、実用的な知識とともに解説します。</p>
+<h5>1. 速度伝達の線形マッピング（ヤコビ行列）</h5>
+<p>微分運動学の最も基本的な思考の枠組みは、関節速度と作業座標系（手先）速度の関係をヤコビ行列を用いた線形方程式 <span class="math"><span class="dot">r</span> = J<sub>r</sub>(q)<span class="dot">q</span></span> として捉えることです。</p>
+<ul>
+<li><strong>実務上の有効性</strong>: 複雑で非線形な「位置」の逆運動学問題を解かなくても、現在の姿勢におけるヤコビ行列さえわかれば、手先を望む方向に動かすための各関節の速度を瞬時に計算できます。</li>
+<li><strong>応用</strong>: 速度制御モードを持つモータを使用する場合、この線形関係を利用して手先の目標軌道に追従させる制御（分解速度制御など）が可能になります。</li>
+</ul>
+<h5>2. 特異姿勢と可操作性の境界</h5>
+<p>ロボットには「特定の方向に動けなくなる姿勢」が存在し、それを数学的にヤコビ行列の行列式 <span class="math">det(J<sub>r</sub>)=0</span> （またはランク落ち）として認識するモデルです。</p>
+<ul>
+<li><strong>実務上の有効性</strong>: 特異姿勢の近傍では、手先のわずかな移動に対して関節速度が無限大に発散しようとするため、制御が極めて不安定になります。</li>
+<li><strong>指標としての活用</strong>: 行列式の絶対値である「可操作性」を指標として監視することで、ロボットがその姿勢でどれだけ自在に動けるかを定量的に評価し、設計や軌道計画に活かします。</li>
+</ul>
+<h5>3. 冗長性の解消と多目的最適化</h5>
+<p>ロボットの自由度 <span class="math">n</span> が作業の次元 <span class="math">m</span> よりも多い「冗長ロボット」において、<strong>「余った自由度」をコスト関数の最適化に割り当てる</strong>思考の枠組みです。</p>
+<ul>
+<li><strong>実務上の有効性</strong>: 一般解 <span class="math"><span class="dot">q</span> = J<sup>+</sup>v + (I - J<sup>+</sup>J)k</span> を用いることで、手先の目標作業（第1優先）を遂行しながら、零空間（Null Space）成分を用いて「障害物回避」や「関節限界の回避」、「可操作性の最大化」といった第2の目的を同時に達成できます。</li>
+<li><strong>実装</strong>: ヒューマノイドのように分岐のある複雑な構造でも、このモデルによって全身の協調動作を計算論的に導き出すことができます。</li>
+</ul>
+<h5>4. 数値的収束による逆運動学解法（ニュートン・ラプソン法）</h5>
+<p>位置に関する逆運動学問題が解析的に解けない場合でも、<strong>微分運動学の関係を繰り返して計算することで、真の解へ数値的に収束させる</strong>モデルです。</p>
+<ul>
+<li><strong>実務上の有効性</strong>: 現在の手先位置と目標位置の誤差をヤコビ行列の逆行列によって関節の修正量 <span class="math">Δ q</span> に変換し、これを繰り返す（テーラー展開の1次近似を利用）ことで、多自由度アームでも確実に解を得られます。</li>
+<li><strong>汎用性</strong>: ロボットのリンクパラメータがわかっており、特異姿勢を避けていれば、プログラムによって自動的に逆運動学を解く汎用的なアルゴリズムを構築できます。</li>
+</ul>
+<h5>5. 数値的不安定性の正則化（レーベンバーグ・マルカート法）</h5>
+<p>実務において特異姿勢を完全に避けることは難しいため、<strong>「精度」と「安定性」をトレードオフにかけることで、計算の破綻を防ぐ</strong>思考の枠組みです。</p>
+<ul>
+<li><strong>実務上の有効性</strong>: 特異姿勢の近傍で逆行列（または擬似逆行列）が過大になるのを防ぐため、小さな減衰項 <span class="math">ε I</span> を導入した「レーベンバーグ・マルカート法」を用いることで、手先の移動精度は若干落ちるものの、モータ速度の暴走を防ぎ、数値的に安定して特異点を通過させることができます。</li>
+<li><strong>リスク管理</strong>: 特異姿勢付近を通る軌道計画を立てる際、このモデルに基づいた処理がなされているかどうかが、実機の安全運用における重要なチェックポイントとなります。</li>
+</ul>
+<p>『実戦ロボット制御』第7章「微分運動学」の内容を深く理解し、実務で使いこなすために重要な専門用語を体系的に列挙します。</p>
+<h5>1. 基本概念：速度の関係性</h5>
+<ul>
+<li><strong>微分運動学 (Differential Kinematics)</strong>: 関節速度と作業座標系（手先）速度の間の微分的な関係を扱う学問領域です。</li>
+<li><strong>ヤコビ行列 (Jacobian Matrix)</strong>: 関節変位 <span class="math">q</span> の微小変化と手先位置・姿勢 <span class="math">r</span> の微小変化を線形に結びつける行列です。</li>
+<li><strong>基礎ヤコビ行列</strong>: 角速度ベクトルを用いて定義され、リンクパラメータから漸次的に計算可能な実用性の高いヤコビ行列です。</li>
+<li><strong>各軸速度制御</strong>: 位置制御ではなく、各関節の速度指令 <span class="math">u</span> を用いて手先の軌道を制御する手法です。</li>
+</ul>
+<h5>2. ロボットの姿勢と性能の評価</h5>
+<ul>
+<li><strong>特異姿勢 (Singularity)</strong>: ヤコビ行列のランクが低下し、手先が特定の方向に動けなくなる姿勢のことです。数学的には <span class="math">det(J)=0</span> となる状態を指します。</li>
+<li><strong>可操作性 (Manipulability)</strong>: ロボットがその姿勢でどれだけ自在に動けるかを示す指標です。通常、<span class="math">w = √(det(JJ<sup>T</sup>))</span> または行列式の絶対値で定義されます。</li>
+<li><strong>冗長性 (Redundancy)</strong>: 作業に必要な自由度 <span class="math">m</span> よりもロボットの自由度 <span class="math">n</span> が多い状態 (<span class="math">n &gt; m</span>) を指します。</li>
+</ul>
+<h5>3. 逆問題の解法と最適化</h5>
+<ul>
+<li><strong>微分逆運動学 (Differential Inverse Kinematics)</strong>: 手先の目標速度から、それを実現するための関節速度を求める計算過程です。</li>
+<li><strong>擬似逆行列 (Pseudo-inverse Matrix)</strong>: 正方行列でないヤコビ行列に対して、最小二乗解を求めるために使われる行列（<span class="math">J<sup>+</sup></span>）です。</li>
+<li><strong>ラグランジュの未定乗数法</strong>: 冗長な自由度がある場合に、特定の制約条件（手先速度）の下で評価関数（関節速度の最小化など）を最適化するために用いられます。</li>
+<li><strong>零空間 (Null Space)</strong>: 手先を動かさない関節運動の集合です。この空間の運動を利用して、メインの作業を邪魔せずに障害物回避や姿勢最適化を行います。</li>
+<li>評価関数 <span class="math">V(q)</span>: 冗長性を利用して最大化（または最小化）したい目的関数（可操作性の最大化など）のことです。</li>
+</ul>
+<h5>4. 数値計算のアルゴリズムと安定化</h5>
+<ul>
+<li><strong>ニュートン・ラプソン法 (Newton-Raphson Method)</strong>: 微分運動学の関係を繰り返し計算（イテレーション）に利用することで、解析的に解けない逆運動学の解を数値的に導き出す手法です。</li>
+<li><strong>テーラー展開 (Taylor Expansion)</strong>: ニュートン・ラプソン法において、非線形な関数を現在の推定値の周りで1次近似するために使用されます。</li>
+<li><strong>レーベンバーグ・マルカート法 (Levenberg-Marquardt Method)</strong>: 特異姿勢付近で数値的に不安定になる（逆行列が過大になる）のを防ぐため、減衰項を導入して計算を安定化させる手法です。</li>
+<li>重み行列 <span class="math">W</span>: 位置の誤差と姿勢の誤差の重要度を調整するなど、多目的な誤差ベクトルを評価する際に各要素の寄与度を決定する行列です。</li>
+</ul>
+<p>これらの用語は、ロボットの制御系を設計・実装する際、特に<strong>「なぜこの数式を使うのか」「計算が破綻したときにどこを修正すべきか」</strong>を判断するための共通言語となります。</p>
+<p>『実戦ロボット制御』の記述に基づき、ロボット制御の専門家たちが直面する、理論と実務の境界で根本的に対立する3つのポイントと、それぞれの陣営の強力な主張を整理します。</p>
+<h5>1. 動きの滑らかさの源泉（軌道計画 vs フィードバック制御）</h5>
+<p>ロボットが振動せず滑らかに動くために、何に重きを置くべきかという対立です。</p>
+<ul>
+<li><strong>軌道計画重視派の主張</strong>: 「<strong>問題は未然に防ぐべきである</strong>」。</li>
+<ul>
+<li>5次多項式などの適切な次数の多項式を用いて、加速度まで連続な（ジャークを抑えた）目標軌道を作成すれば、ロボットに過度な衝撃を与えず、振動の発生そのものを数学的に回避できると主張します。</li>
+</ul>
+<li><strong>フィードバック制御重視派の主張</strong>: 「<strong>現実は計画通りにいかない</strong>」。</li>
+<ul>
+<li>どれほど滑らかな計画を立てても、モデルの誤差や外乱、急な停止条件などによって振動は必ず発生します。したがって、センサー情報を用いて発生した振動を即座に抑え込む制御アルゴリズムや、機械的なダンパ要素の導入こそが本質的であると主張します。</li>
+</ul>
+</ul>
+<h5>2. 特異点付近の戦略（精度優先 vs 数値的安定性）</h5>
+<p>手先が動けなくなる「特異姿勢」の近傍で、計算式をどう扱うかという対立です。</p>
+<ul>
+<li><strong>精度優先（厳密解）派の主張</strong>: 「<strong>作業（タスク）の完遂が最優先である</strong>」。</li>
+<ul>
+<li>溶接や加工などの実務では、手先が軌道から外れることは許されません。ヤコビ行列の基本式 <span class="math"><span class="dot">r</span> = J<span class="dot">q</span></span> を可能な限り厳密に解き、たとえ特異点付近で関節速度が跳ね上がっても、目標位置を死守すべきであるという立場です。</li>
+</ul>
+<li><strong>安定性（正則化）派の主張</strong>: 「<strong>システムの破壊（計算の暴走）を防ぐのがプロの仕事である</strong>」。</li>
+<ul>
+<li>特異点付近での逆行列計算は数値的な発散を招き、モータを物理的に破壊する恐れがあります。「レーベンバーグ・マルカート法」のように、あえて手先の精度をわずかに落とす（減衰項を入れる）ことで、関節速度を安全な範囲に抑え、数値的な安定性を確保すべきだと主張します。</li>
+</ul>
+</ul>
+<h5>3. 動力学特性の扱い（モデルベース制御 vs 高減速比・高ゲイン）</h5>
+<p>ロボットの物理的な複雑さ（重力、遠心力など）とどう向き合うかという対立です。</p>
+<ul>
+<li><strong>モデルベース制御派の主張</strong>: 「<strong>物理法則を計算で支配すべきである</strong>」。</li>
+<ul>
+<li>高速・高精度な動きを実現するには、ロボットの運動方程式を解き、非線形な重力や遠心力・コリオリ力を計算によって打ち消す（フィードフォワード補償）ことが不可欠であると考えます。</li>
+</ul>
+<li><strong>高減速比・高ゲイン派の主張</strong>: 「<strong>ハードウェアの特性で物理を無視（線形化）すべきである</strong>」。</li>
+<ul>
+<li>精度の高い物理パラメータを得ることは困難です。むしろ、大きな減速比を持つモータと高いフィードバックゲインを使用することで、ロボットの複雑な動力学特性を「無視できるほど小さな影響」に抑え込み、個別の物理演算に頼らずとも安定して動かせるシンプルなシステムを構築すべきだと主張します。</li>
+</ul>
+</ul>
+<p>これらの対立は、<strong>「数学的な美しさや理想（計画・厳密解・モデル）」</strong>を取るか、<strong>「現場での頑健性や安全性（フィードバック・正則化・高減速比）」</strong>を取るかという、実務上の非常に重要なトレードオフに基づいています。</p>
+      </div>
+    </div>
+  </section>
+  <div class="page">
+    <footer>
+      Source: C:\Users\furuk\Desktop\実戦ロボティクス7章.txt<br>
+      Output: C:\Users\furuk\Desktop\thinking\ロボティクスまとめHTML\実戦ロボティクス\実戦ロボティクス7章_微分運動学.html<br>
+      Design: visual-html-renderer structure + editorial dark theme
+    </footer>
+  </div>
+  <script>
+    document.querySelectorAll(".quiz-card").forEach((card) => {
+      const choices = Array.from(card.querySelectorAll(".quiz-choice"));
+      const feedback = card.querySelector(".quiz-feedback");
+      const label = card.querySelector(".feedback-label");
+      choices.forEach((choice) => {
+        choice.addEventListener("click", () => {
+          const isCorrect = choice.dataset.correct === "true";
+          card.classList.add("answered");
+          choices.forEach((button) => {
+            button.classList.remove("is-wrong");
+            if (button.dataset.correct === "true") {
+              button.classList.add("is-correct");
+              button.setAttribute("aria-label", button.textContent.trim() + " 正解");
+            } else {
+              button.setAttribute("aria-label", button.textContent.trim());
+            }
+          });
+          if (!isCorrect) {
+            choice.classList.add("is-wrong");
+          }
+          label.textContent = isCorrect ? "正解" : "不正解。正解は緑の選択肢です";
+          feedback.classList.add("is-visible");
+        });
+      });
+    });
+  </script>
+</body>
+</html>

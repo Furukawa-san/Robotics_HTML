@@ -1,0 +1,1620 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ニュートン・オイラー法 学習ラボ</title>
+  <style>
+    :root {
+      --bg: #000000;
+      --surface: #1d1d1f;
+      --surface-2: #131315;
+      --surface-3: #2a2a2c;
+      --ink: #f5f5f7;
+      --muted: #c4c7c8;
+      --subtle: #8e9192;
+      --line: rgba(255, 255, 255, 0.12);
+      --line-strong: rgba(255, 255, 255, 0.22);
+      --accent: #0071e3;
+      --accent-soft: rgba(0, 113, 227, 0.18);
+      --accent-dark: #abc7ff;
+      --black: #000000;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --blue: #0071e3;
+      --teal: #0f766e;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+      --mono: "Geist Mono", "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+      --sans: Inter, "Noto Sans JP", "Segoe UI", system-ui, sans-serif;
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 78% 0%, rgba(0, 113, 227, 0.18), transparent 30rem),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        var(--bg);
+      background-size: auto, 32px 32px, 32px 32px, auto;
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.74;
+      letter-spacing: 0;
+      text-rendering: optimizeLegibility;
+    }
+
+    a { color: inherit; text-underline-offset: 0.2em; }
+    ::selection { background: rgba(0, 113, 227, 0.44); color: #fff; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 268px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 18px;
+      border-right: 1px solid var(--line);
+      background: rgba(19, 19, 21, 0.78);
+      backdrop-filter: blur(20px);
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+    }
+
+    .brand-mark {
+      display: inline-grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+      color: #1d1d1f;
+      font-family: var(--mono);
+      font-weight: 700;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.35;
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    nav {
+      display: grid;
+      gap: 6px;
+      margin-top: 22px;
+    }
+
+    nav a {
+      display: block;
+      padding: 9px 10px;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      font-size: 0.88rem;
+      text-decoration: none;
+      transition: background 200ms var(--ease), border-color 200ms var(--ease), color 200ms var(--ease);
+    }
+
+    nav a:hover,
+    nav a:focus-visible {
+      outline: none;
+      border-color: var(--line);
+      background: rgba(255,255,255,0.07);
+      color: var(--ink);
+    }
+
+    .progress-box {
+      margin-top: 22px;
+      padding: 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      color: var(--ink);
+    }
+
+    .progress-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-family: var(--mono);
+      text-transform: uppercase;
+    }
+
+    .progress-box strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 1.55rem;
+      line-height: 1;
+    }
+
+    main {
+      min-width: 0;
+    }
+
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+      gap: 32px;
+      align-items: center;
+      padding: 54px clamp(20px, 5vw, 72px) 38px;
+      min-height: 86vh;
+      background:
+        radial-gradient(circle at 78% 40%, rgba(0, 113, 227, 0.18), transparent 26rem),
+        linear-gradient(135deg, rgba(29, 29, 31, 0.92), rgba(14, 14, 16, 0.96));
+      border-bottom: 1px solid var(--line);
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, transparent 0 58%, rgba(255, 255, 255, 0.10) 58% 58.5%, transparent 58.5%),
+        linear-gradient(90deg, rgba(0, 113, 227, 0.12), transparent 45%);
+      pointer-events: none;
+    }
+
+    .hero-copy,
+    .hero-visual {
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 16px;
+      color: var(--accent-dark);
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .hero h2 {
+      max-width: 780px;
+      margin: 0;
+      font-size: 4.35rem;
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .hero h2 span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.48em;
+      line-height: 1.2;
+      margin-top: 14px;
+      font-weight: 600;
+    }
+
+    .hero-lead {
+      max-width: 760px;
+      margin: 24px 0 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 26px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 10px 15px;
+      border: 1px solid #ffffff;
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+      color: #1d1d1f;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 200ms var(--ease), background 200ms var(--ease), border-color 200ms var(--ease);
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      outline: none;
+      transform: translateY(-1px) scale(1.02);
+    }
+
+    .button.secondary {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--line-strong);
+    }
+
+    .button.secondary:hover,
+    .button.secondary:focus-visible {
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(255,255,255,0.34);
+    }
+
+    .robot-panel {
+      position: relative;
+      min-height: 420px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        radial-gradient(circle at 20% 20%, rgba(0, 113, 227, 0.30), transparent 28%),
+        linear-gradient(145deg, #0e0e10, #24262b);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .robot-panel::before {
+      content: "";
+      position: absolute;
+      inset: 22px;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 8px;
+    }
+
+    .axis-grid {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent);
+    }
+
+    .arm {
+      position: absolute;
+      left: 50%;
+      top: 57%;
+      width: 260px;
+      height: 170px;
+      transform: translate(-50%, -50%);
+    }
+
+    .joint {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      border: 7px solid #ffffff;
+      border-radius: 50%;
+      background: #0e0e10;
+      box-shadow: 0 0 0 8px rgba(0, 113, 227, 0.18);
+      z-index: 3;
+    }
+
+    .joint.base { left: 10px; top: 98px; }
+    .joint.elbow { left: 110px; top: 38px; }
+    .joint.tip { left: 210px; top: 88px; }
+
+    .link {
+      position: absolute;
+      height: 28px;
+      width: 126px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #ffffff, #c6c6c7);
+      transform-origin: left center;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.2);
+    }
+
+    .link.one { left: 42px; top: 104px; transform: rotate(-31deg); }
+    .link.two { left: 143px; top: 60px; transform: rotate(27deg); }
+
+    .vector {
+      position: absolute;
+      padding: 5px 8px;
+      border: 1px solid rgba(255,255,255,0.24);
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.08);
+      color: white;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      backdrop-filter: blur(16px);
+    }
+
+    .vector.v1 { left: 30px; top: 30px; }
+    .vector.v2 { right: 28px; top: 62px; }
+    .vector.v3 { left: 42px; bottom: 34px; }
+
+    .section {
+      padding: 54px clamp(20px, 5vw, 72px);
+      border-bottom: 1px solid var(--line);
+      background: rgba(19, 19, 21, 0.84);
+    }
+
+    .section.alt {
+      background: rgba(14, 14, 16, 0.92);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 0.75fr) minmax(260px, 0.45fr);
+      gap: 28px;
+      align-items: end;
+      margin-bottom: 28px;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 2.7rem;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .deep-overview {
+      display: grid;
+      grid-template-columns: minmax(0, 0.8fr) minmax(320px, 0.42fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .chapter-map {
+      display: grid;
+      gap: 10px;
+    }
+
+    .map-item {
+      display: grid;
+      grid-template-columns: 74px minmax(0, 1fr);
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+    }
+
+    .map-item .tag {
+      display: inline-grid;
+      place-items: center;
+      height: 30px;
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.08);
+      color: var(--accent-dark);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .map-item h4 {
+      margin: 0 0 4px;
+      font-size: 1rem;
+    }
+
+    .map-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .dense-note {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.06);
+      color: var(--ink);
+      box-shadow: var(--shadow);
+    }
+
+    .dense-note h4 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+    }
+
+    .dense-note p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .dense-note p:last-child { margin-bottom: 0; }
+
+    .formula-stack {
+      display: grid;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .formula-row {
+      display: grid;
+      grid-template-columns: 170px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .formula-row b {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--accent-dark);
+    }
+
+    .formula-row code {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      overflow-wrap: anywhere;
+    }
+
+    .detail-blocks {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .detail-block {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025));
+    }
+
+    .detail-block h4 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+    }
+
+    .detail-block p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .detail-block ul,
+    .detail-block ol {
+      margin: 0;
+      padding-left: 1.2rem;
+      color: var(--muted);
+      font-size: 0.93rem;
+    }
+
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .mini-table th,
+    .mini-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 0.9rem;
+    }
+
+    .mini-table th {
+      background: rgba(255,255,255,0.08);
+      font-weight: 800;
+    }
+
+    .mini-table tr:last-child td { border-bottom: 0; }
+
+    .card {
+      min-width: 0;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.025));
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.24);
+      transition: transform 200ms var(--ease), border-color 200ms var(--ease);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--line-strong);
+    }
+
+    .card .num {
+      display: inline-grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      margin-bottom: 12px;
+      border-radius: var(--radius-sm);
+      background: rgba(0, 113, 227, 0.18);
+      color: var(--accent-dark);
+      font-family: var(--mono);
+      font-weight: 800;
+    }
+
+    .card h4 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      line-height: 1.35;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .formula {
+      margin: 22px 0;
+      padding: 18px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: #0e0e10;
+      color: white;
+      overflow-x: auto;
+    }
+
+    .formula code {
+      font-family: var(--mono);
+      font-size: 1rem;
+      white-space: nowrap;
+    }
+
+    .term-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .term {
+      padding: 16px;
+      border-left: 4px solid var(--accent);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      background: var(--surface);
+    }
+
+    .term strong {
+      display: block;
+      font-family: var(--mono);
+      margin-bottom: 4px;
+    }
+
+    .term span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(310px, 0.75fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .compare-table th,
+    .compare-table td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 0.94rem;
+    }
+
+    .compare-table th {
+      background: rgba(255,255,255,0.08);
+      color: white;
+      font-weight: 700;
+    }
+
+    .compare-table tr:last-child td { border-bottom: 0; }
+
+    .callout {
+      padding: 18px;
+      border: 1px solid rgba(0, 113, 227, 0.32);
+      border-radius: var(--radius);
+      background: rgba(0, 113, 227, 0.10);
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .flow-lane {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .lane-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      background: #0e0e10;
+      color: white;
+      font-weight: 700;
+    }
+
+    .lane-head span {
+      font-family: var(--mono);
+      color: var(--accent-dark);
+      font-size: 0.82rem;
+    }
+
+    .steps {
+      counter-reset: step;
+      display: grid;
+      gap: 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .steps li {
+      counter-increment: step;
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr);
+      gap: 12px;
+      padding: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .steps li::before {
+      content: counter(step);
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius-sm);
+      background: rgba(0, 113, 227, 0.18);
+      color: var(--accent-dark);
+      font-family: var(--mono);
+      font-weight: 800;
+    }
+
+    .steps h4 {
+      margin: 0 0 4px;
+      font-size: 1rem;
+    }
+
+    .steps p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .code-panel {
+      margin-top: 18px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #0d1320;
+      box-shadow: var(--shadow);
+    }
+
+    .code-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      color: white;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+    }
+
+    pre {
+      margin: 0;
+      padding: 18px;
+      overflow-x: auto;
+      color: #d7e3f5;
+      font-family: var(--mono);
+      font-size: 0.86rem;
+      line-height: 1.65;
+    }
+
+    .code-comment { color: #8ea0bb; }
+    .code-key { color: #abc7ff; }
+    .code-fn { color: #7dd3fc; }
+    .code-var { color: #c4b5fd; }
+
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .check {
+      display: grid;
+      gap: 6px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .check b {
+      font-size: 0.95rem;
+    }
+
+    .check span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .quiz {
+      display: grid;
+      gap: 14px;
+    }
+
+    .question {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025));
+    }
+
+    .question h4 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+    }
+
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+
+    .option {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 200ms var(--ease), border-color 200ms var(--ease), transform 200ms var(--ease);
+    }
+
+    .option:hover {
+      border-color: var(--line-strong);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .option input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      margin-top: 4px;
+    }
+
+    .option.correct {
+      border-color: rgba(22, 163, 74, 0.45);
+      background: rgba(22, 163, 74, 0.08);
+    }
+
+    .option.wrong {
+      border-color: rgba(220, 38, 38, 0.45);
+      background: rgba(220, 38, 38, 0.08);
+    }
+
+    .explain {
+      display: none;
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .quiz-actions {
+      position: sticky;
+      bottom: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(19, 19, 21, 0.86);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.26);
+    }
+
+    .score {
+      font-family: var(--mono);
+      font-weight: 800;
+    }
+
+    .footer {
+      padding: 30px clamp(20px, 5vw, 72px);
+      border-top: 1px solid var(--line);
+      background: #0e0e10;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+      aside {
+        position: relative;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      nav {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .progress-box { display: none; }
+      .hero,
+      .section-head,
+      .deep-overview,
+      .split {
+        grid-template-columns: 1fr;
+      }
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .term-grid,
+      .detail-blocks,
+      .checklist { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 720px) {
+      nav { grid-template-columns: 1fr; }
+      .hero {
+        padding-top: 34px;
+        min-height: auto;
+      }
+      .hero h2 { font-size: 2.45rem; }
+      h3 { font-size: 1.8rem; }
+      .formula code { font-size: 0.92rem; }
+      .robot-panel { min-height: 330px; }
+      .cards,
+      .term-grid,
+      .flow,
+      .detail-blocks,
+      .checklist {
+        grid-template-columns: 1fr;
+      }
+      .map-item,
+      .formula-row {
+        grid-template-columns: 1fr;
+      }
+      .compare-table {
+        display: block;
+        overflow-x: auto;
+      }
+      .quiz-actions {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <div class="brand-mark">NE</div>
+        <h1>ニュートン・オイラー法 学習ラボ</h1>
+        <p>第9章「ロボットの運動方程式」を実装目線で理解する。</p>
+      </div>
+      <nav aria-label="目次">
+        <a href="#goal">学習ゴール</a>
+        <a href="#deep-dive">詳細解説</a>
+        <a href="#mental">5つのモデル</a>
+        <a href="#equation">式の読解</a>
+        <a href="#algorithm">漸次計算</a>
+        <a href="#python">Python化</a>
+        <a href="#quiz">確認クイズ</a>
+      </nav>
+      <div class="progress-box" aria-hidden="true">
+        <span>到達目標</span>
+        <strong>実務で書ける</strong>
+      </div>
+    </aside>
+
+    <main>
+      <section class="hero" id="goal">
+        <div class="hero-copy">
+          <div class="eyebrow">ロボット動力学</div>
+          <h2>ニュートン・オイラー法を、実務で使える形にする <span>公式暗記から、Python実装できる理解へ。</span></h2>
+          <p class="hero-lead">
+            このHTMLは、運動方程式を「慣性・速度依存項・重力」の暗記で終わらせず、
+            根元から先端へ動きを伝え、先端から根元へ負荷を回収する計算手順として整理します。
+            最後に、概念理解・式の読解・Python実装判断をまとめて確認します。
+          </p>
+          <div class="hero-actions">
+            <a class="button" href="#algorithm">手順から読む</a>
+            <a class="button secondary" href="#quiz">クイズへ進む</a>
+          </div>
+        </div>
+        <div class="hero-visual" aria-label="ロボットアームの概念図">
+          <div class="robot-panel">
+            <div class="axis-grid"></div>
+            <div class="vector v1">外向き: ω, α, a</div>
+            <div class="vector v2">内向き: f, n</div>
+            <div class="vector v3">τ = zᵀn</div>
+            <div class="arm">
+              <div class="link one"></div>
+              <div class="link two"></div>
+              <div class="joint base"></div>
+              <div class="joint elbow"></div>
+              <div class="joint tip"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section alt" id="deep-dive">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">第9章 詳細解説</div>
+            <h3>第9章を、式の導出から実装手順までつなげて読む</h3>
+          </div>
+          <p>PDFの章全体は、ラグランジュ法で構造を見通し、ニュートン・オイラー法で計算機に載せる、という二段構えです。ここでは「何を求め、どの式が何を表し、Python実装では何に対応するか」を冒頭でまとめます。</p>
+        </div>
+
+        <div class="deep-overview">
+          <div class="chapter-map">
+            <div class="map-item">
+              <span class="tag">9.1</span>
+              <div>
+                <h4>2自由度平面ロボットをラグランジュ法で導く</h4>
+                <p>一般化座標を θ1, θ2 とし、各リンクの重心位置、速度、運動エネルギー、位置エネルギーを順に計算します。最後にラグランジュ方程式へ代入し、関節トルク τ1, τ2 を得ます。</p>
+              </div>
+            </div>
+            <div class="map-item">
+              <span class="tag">9.2</span>
+              <div>
+                <h4>M, h, g の性質を一般形で理解する</h4>
+                <p>運動エネルギーを 1/2 qdot^T M(q) qdot と書くことで、慣性行列 M(q)、遠心力・コリオリ力項 h(q,qdot)、重力項 g(q) の役割が明確になります。</p>
+              </div>
+            </div>
+            <div class="map-item">
+              <span class="tag">9.3-9.7</span>
+              <div>
+                <h4>ニュートン・オイラー法を再帰計算として組み立てる</h4>
+                <p>運動学的関係式、リンクごとのニュートン・オイラー方程式、リンク内部の力とモーメントのつり合いを組み合わせ、外向き計算と内向き計算にまとめます。</p>
+              </div>
+            </div>
+            <div class="map-item">
+              <span class="tag">9.8-9.9</span>
+              <div>
+                <h4>2自由度アームで両手法の一致を確認する</h4>
+                <p>具体的な回転行列、重力、重心、慣性テンソル、境界条件を入れて計算し、ラグランジュ法で得た結果と同じ運動方程式になることを確認します。</p>
+              </div>
+            </div>
+          </div>
+
+          <aside class="dense-note">
+            <h4>この章の読み方</h4>
+            <p>ラグランジュ法は「式の意味を見抜く方法」です。エネルギーから M, h, g がどう現れるかを理解しやすい一方、自由度が増えると式展開が重くなります。</p>
+            <p>ニュートン・オイラー法は「実装する方法」です。リンクごとの速度、加速度、力、モーメントを再帰的に渡すため、多自由度でも計算手順を保ちやすいです。</p>
+            <p>実務では、理論の検算にはラグランジュ法、リアルタイム計算や逆動力学の実装にはニュートン・オイラー法、という使い分けが自然です。</p>
+          </aside>
+        </div>
+
+        <div class="formula-stack" aria-label="第9章の主要式">
+          <div class="formula-row">
+            <b>ラグランジュ関数</b>
+            <code>L = E_k - E_p</code>
+          </div>
+          <div class="formula-row">
+            <b>ラグランジュ方程式</b>
+            <code>d/dt(∂L/∂qdot_i) - ∂L/∂q_i = f_i</code>
+          </div>
+          <div class="formula-row">
+            <b>標準的な運動方程式</b>
+            <code>M(q) qdd + h(q, qdot) + g(q) = τ</code>
+          </div>
+          <div class="formula-row">
+            <b>運動エネルギーの一般形</b>
+            <code>E_k = 1/2 qdot^T M(q) qdot</code>
+          </div>
+          <div class="formula-row">
+            <b>ニュートン・オイラーの出力</b>
+            <code>τ_i = z_i^T n_i (回転関節), τ_i = z_i^T f_i (直動関節)</code>
+          </div>
+        </div>
+
+        <div class="detail-blocks">
+          <article class="detail-block">
+            <h4>1. ラグランジュ法で何をしているのか</h4>
+            <p>9.1では、2自由度平面アームを例に、各リンクの重心位置を座標で表し、それを時間微分して速度を得ます。並進運動エネルギーは重心速度から、回転運動エネルギーは各リンクの角速度と慣性モーメントから計算します。</p>
+            <ul>
+              <li>リンク1の重心は θ1 によって動く。</li>
+              <li>リンク2の重心は θ1 と θ2 の合成角によって動く。</li>
+              <li>運動エネルギーは並進分と回転分の和になる。</li>
+              <li>位置エネルギーは重力方向の高さ、つまり重心の y 成分で決まる。</li>
+            </ul>
+          </article>
+
+          <article class="detail-block">
+            <h4>2. M(q), h(q,qdot), g(q) に分かれる意味</h4>
+            <p>導出後の式は、加速度に比例する項、速度の積で現れる項、姿勢だけで決まる重力項に整理できます。これは単なる記法ではなく、制御とデバッグの分類軸です。</p>
+            <table class="mini-table">
+              <thead>
+                <tr>
+                  <th scope="col">項</th>
+                  <th scope="col">意味</th>
+                  <th scope="col">実務での見方</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>M(q)qdd</td>
+                  <td>加速に必要な慣性負荷</td>
+                  <td>動き出しや急加速で効く</td>
+                </tr>
+                <tr>
+                  <td>h(q,qdot)</td>
+                  <td>遠心力・コリオリ力</td>
+                  <td>高速動作で誤差や振れとして現れる</td>
+                </tr>
+                <tr>
+                  <td>g(q)</td>
+                  <td>自重を支える負荷</td>
+                  <td>静止時の垂れや重力補償で効く</td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+
+          <article class="detail-block">
+            <h4>3. 9.2の重要性: 安定性に効く性質</h4>
+            <p>9.2では、具体例を離れて一般的なロボットの性質を見ます。運動エネルギーを qdot^T M(q) qdot の形で書けるため、M(q) は対称で正定値という重要な性質を持ちます。</p>
+            <ul>
+              <li>正定値性は、動いている限り運動エネルギーが正であることを意味する。</li>
+              <li>対称性は、慣性の相互作用が物理的に整合していることを示す。</li>
+              <li>S(q,qdot) の歪対称性は、後の重力補償制御や安定性証明で便利な形を作る。</li>
+            </ul>
+          </article>
+
+          <article class="detail-block">
+            <h4>4. ニュートン・オイラー法の全体像</h4>
+            <p>9.3以降では、リンクごとの力学を使います。まず、リンク間の速度・加速度の関係を作り、次に各リンクの重心に働く慣性力と慣性モーメントを求め、最後に関節軸方向へ射影してモータが出すべき τ を取り出します。</p>
+            <ol>
+              <li>運動学的関係式で、親リンクから子リンクへ速度・加速度を渡す。</li>
+              <li>ニュートンの式で、重心加速度から力 f を求める。</li>
+              <li>オイラーの式で、角加速度と角速度からモーメント n を求める。</li>
+              <li>リンク内部のつり合いで、先端側の負荷を根元へ戻す。</li>
+              <li>関節軸 z との内積で、有効トルクまたは有効力を得る。</li>
+            </ol>
+          </article>
+
+          <article class="detail-block">
+            <h4>5. 外向き計算で見落としやすい外積項</h4>
+            <p>回転関節では、角速度に z_i qdot_i を足すだけでなく、角加速度では親リンクの角速度と関節軸方向速度の外積が現れます。これは、回転している座標系上でベクトルを微分しているからです。</p>
+            <ul>
+              <li>角速度: 親の角速度に関節の相対回転を加える。</li>
+              <li>角加速度: qdd_i だけでなく、軸の向きが変わる効果を加える。</li>
+              <li>重心加速度: 原点加速度に接線加速度と向心加速度を加える。</li>
+            </ul>
+          </article>
+
+          <article class="detail-block">
+            <h4>6. 内向き計算で何を回収しているのか</h4>
+            <p>内向き計算は、手先側から根元側へ「このリンクを支えるにはどれだけの力とモーメントが必要か」を足し戻す処理です。先端に外力がなければ初期値をゼロにできますが、接触や荷重がある場合はここに外力を入れます。</p>
+            <ul>
+              <li>子リンクから来る力を、自リンクの慣性力に加える。</li>
+              <li>子リンクから来るモーメントに、力の作用点ずれによるモーメントも加える。</li>
+              <li>最後に z 軸方向成分だけを τ として取り出す。</li>
+            </ul>
+          </article>
+
+          <article class="detail-block">
+            <h4>7. 2自由度アーム例から実装へ移す</h4>
+            <p>9.8では、2自由度アームについて回転行列、重力ベクトル、リンク長ベクトル、慣性テンソル、重心位置、先端外力ゼロ、基底初期条件を設定して、外向きと内向きを具体的に計算しています。</p>
+            <table class="mini-table">
+              <thead>
+                <tr>
+                  <th scope="col">PDFで置く量</th>
+                  <th scope="col">Python実装での対応</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>回転行列 R</td>
+                  <td>各リンク姿勢を親座標から子座標へ変換する関数</td>
+                </tr>
+                <tr>
+                  <td>重力ベクトル g</td>
+                  <td>基底加速度 pdd_0 = -g として初期化</td>
+                </tr>
+                <tr>
+                  <td>重心位置 s_i</td>
+                  <td>リンクデータの com_from_origin</td>
+                </tr>
+                <tr>
+                  <td>先端外力ゼロ</td>
+                  <td>child_force = 0, child_moment = 0</td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+
+          <article class="detail-block">
+            <h4>8. この章を実務で使う時の最短ルート</h4>
+            <p>最初から一般式を丸暗記するより、2自由度例を使って「外向きで運動を作る」「内向きで負荷を戻す」「最後に軸へ射影する」という流れをコードに写すのが近道です。</p>
+            <ol>
+              <li>静止状態で g(q) だけが出るか確認する。</li>
+              <li>低速動作で h(q,qdot) が小さいことを確認する。</li>
+              <li>加速度を入れて M(q)qdd の符号と大きさを見る。</li>
+              <li>先端外力を入れて、根元側トルクが増えるか確認する。</li>
+              <li>ラグランジュ法の2自由度式と、ニュートン・オイラー法の結果が一致するか検算する。</li>
+            </ol>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="mental">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">メンタルモデル</div>
+            <h3>まず、頭の中の見取り図を作る</h3>
+          </div>
+          <p>第9章の数式群は、実務では次の5つの見方に圧縮できます。特にニュートン・オイラー法では「情報の往復リレー」と「軸への射影」が実装の中心になります。</p>
+        </div>
+
+        <div class="cards">
+          <article class="card">
+            <span class="num">01</span>
+            <h4>三位一体分解</h4>
+            <p>トルクを慣性、速度依存項、重力に切り分けてデバッグする。</p>
+          </article>
+          <article class="card">
+            <span class="num">02</span>
+            <h4>エネルギー vs 力のつり合い</h4>
+            <p>見通しのラグランジュ、実装効率のニュートン・オイラー。</p>
+          </article>
+          <article class="card">
+            <span class="num">03</span>
+            <h4>情報の往復リレー</h4>
+            <p>速度・加速度は外向き、力・モーメントは内向きに流す。</p>
+          </article>
+          <article class="card">
+            <span class="num">04</span>
+            <h4>軸への射影</h4>
+            <p>モータが担当できる成分だけを関節軸ベクトルで取り出す。</p>
+          </article>
+          <article class="card">
+            <span class="num">05</span>
+            <h4>慣性行列の信頼性</h4>
+            <p>M(q) は対称かつ正定値。検算と安定性議論の土台になる。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section alt" id="equation">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">式の読み方</div>
+            <h3>運動方程式を「故障診断表」として読む</h3>
+          </div>
+          <p>実務で大事なのは、式を眺めて「いま何が足りないのか」を切り分けられることです。</p>
+        </div>
+
+        <div class="formula">
+          <code>τ = M(q) q̈ + h(q, q̇) + g(q)</code>
+        </div>
+
+        <div class="term-grid">
+          <div class="term">
+            <strong>τ</strong>
+            <span>各関節が出す一般化力。回転関節ならトルク、直動関節なら力。</span>
+          </div>
+          <div class="term">
+            <strong>M(q) q̈</strong>
+            <span>姿勢で変わる「動きにくさ」と、目標加速度が作る慣性負荷。</span>
+          </div>
+          <div class="term">
+            <strong>h(q, q̇)</strong>
+            <span>遠心力・コリオリ力。速度が0なら消える、動いている時だけの負荷。</span>
+          </div>
+          <div class="term">
+            <strong>g(q)</strong>
+            <span>自重を支えるための項。静止中でも必要なトルク。</span>
+          </div>
+        </div>
+
+        <div class="split" style="margin-top: 22px;">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th scope="col">症状</th>
+                <th scope="col">疑う項</th>
+                <th scope="col">実務で見るもの</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>速く動かすと軌道が膨らむ</td>
+                <td>h(q, q̇)</td>
+                <td>速度2乗に効く遠心・コリオリの補償不足</td>
+              </tr>
+              <tr>
+                <td>腕を横に伸ばすと垂れる</td>
+                <td>g(q)</td>
+                <td>重心位置、リンク質量、重力補償の符号</td>
+              </tr>
+              <tr>
+                <td>加速開始で大きく遅れる</td>
+                <td>M(q) q̈</td>
+                <td>慣性パラメータ、加速度指令、減速機比</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="callout">
+            <strong>実装目線の読み方</strong>
+            静止でずれるならまず g(q)。速度を上げると悪化するなら h(q, q̇)。加速の瞬間だけ重いなら M(q)q̈。式は、単なる完成形ではなくデバッグの索引です。
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="algorithm">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">漸次アルゴリズム</div>
+            <h3>ニュートン・オイラー法は、往復する計算パイプライン</h3>
+          </div>
+          <p>ラグランジュ法が全体のエネルギーから式を作るのに対し、ニュートン・オイラー法はリンクごとの力学を隣へ渡します。多自由度でも式が爆発しにくいのが強みです。</p>
+        </div>
+
+        <div class="flow">
+          <div class="flow-lane">
+            <div class="lane-head">外向き計算 <span>根元 → 先端</span></div>
+            <ol class="steps">
+              <li>
+                <div>
+                  <h4>親リンクの状態を受け取る</h4>
+                  <p>ω, α, 原点加速度を、根元から順に渡す。</p>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <h4>関節の相対運動を足す</h4>
+                  <p>q̇ と q̈ を関節軸 z に沿って足す。軸自体が回るので外積項も入る。</p>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <h4>重心加速度を求める</h4>
+                  <p>原点加速度に、接線加速度 α×r と向心加速度 ω×(ω×r) を加える。</p>
+                </div>
+              </li>
+            </ol>
+          </div>
+
+          <div class="flow-lane">
+            <div class="lane-head">内向き計算 <span>先端 → 根元</span></div>
+            <ol class="steps">
+              <li>
+                <div>
+                  <h4>リンク自身の慣性力を計算</h4>
+                  <p>質量、重心加速度、慣性テンソルから f と n を作る。</p>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <h4>子リンクの負荷を回収</h4>
+                  <p>先端側にぶら下がるリンクの力とモーメントを合計する。</p>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <h4>関節軸へ射影する</h4>
+                  <p>回転関節は τ = zᵀn、直動関節は τ = zᵀf で駆動成分だけ取り出す。</p>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <section class="section alt" id="python">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Python実装</div>
+            <h3>Pythonに落とす時の骨格</h3>
+          </div>
+          <p>最初から完全なライブラリを目指すより、データ構造、外向き、内向き、射影の4つを分けると理解しやすくなります。</p>
+        </div>
+
+        <div class="code-panel">
+          <div class="code-title">
+            <span>inverse_dynamics.py</span>
+            <span>概念スケルトン</span>
+          </div>
+          <pre><code><span class="code-key">def</span> <span class="code-fn">inverse_dynamics</span>(model, q, qd, qdd, gravity):
+    <span class="code-comment"># 1. 外向き計算: rootからtipへ速度・加速度を伝える</span>
+    states = []
+    parent_w = zeros3()
+    parent_alpha = zeros3()
+    parent_acc = -gravity
+
+    <span class="code-key">for</span> i, link <span class="code-key">in</span> enumerate(model.links):
+        z = joint_axis_in_world(model, i, q)
+        r = link.origin_from_parent
+        s = link.com_from_origin
+
+        w = parent_w + z * qd[i]
+        alpha = parent_alpha + z * qdd[i] + cross(parent_w, z * qd[i])
+        origin_acc = parent_acc + cross(parent_alpha, r) + cross(parent_w, cross(parent_w, r))
+        com_acc = origin_acc + cross(alpha, s) + cross(w, cross(w, s))
+
+        states.append((w, alpha, origin_acc, com_acc, z))
+        parent_w, parent_alpha, parent_acc = w, alpha, origin_acc
+
+    <span class="code-comment"># 2. 内向き計算: tipからrootへ力・モーメントを回収する</span>
+    tau = zeros(model.dof)
+    child_force = zeros3()
+    child_moment = zeros3()
+
+    <span class="code-key">for</span> i <span class="code-key">in</span> reversed(range(model.dof)):
+        link = model.links[i]
+        w, alpha, origin_acc, com_acc, z = states[i]
+
+        f = link.mass * com_acc + child_force
+        n = link.inertia @ alpha + cross(w, link.inertia @ w) + child_moment
+
+        <span class="code-key">if</span> link.joint_type == <span class="code-var">"revolute"</span>:
+            tau[i] = dot(z, n)
+        <span class="code-key">else</span>:
+            tau[i] = dot(z, f)
+
+        child_force, child_moment = propagate_to_parent(f, n, link)
+
+    <span class="code-key">return</span> tau</code></pre>
+        </div>
+
+        <div class="checklist">
+          <div class="check">
+            <b>座標系を混ぜない</b>
+            <span>ベクトルがワールド座標かリンク座標かを関数名や型で明示する。</span>
+          </div>
+          <div class="check">
+            <b>外積項を省略しない</b>
+            <span>回転座標系でベクトルを微分すると、向きの変化による項が出る。</span>
+          </div>
+          <div class="check">
+            <b>最後は必ず射影</b>
+            <span>モータが出すのは軸方向成分だけ。全モーメントをそのまま使わない。</span>
+          </div>
+          <div class="check">
+            <b>静止テストから始める</b>
+            <span>q̇ = 0, q̈ = 0 なら、結果は重力補償トルクだけになる。</span>
+          </div>
+          <div class="check">
+            <b>単位を固定する</b>
+            <span>角度はrad、長さはm、質量はkg、トルクはN mに統一する。</span>
+          </div>
+          <div class="check">
+            <b>摩擦は別枠で扱う</b>
+            <span>基本式に入らない現実要素として、静止摩擦やバックラッシを切り分ける。</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="quiz">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">最終チェック</div>
+            <h3>最後に確認クイズ</h3>
+          </div>
+          <p>提示資料にある「理解度を見極めるための10の質問」を、採点できる三択クイズとして収録しています。採点後に各問の解説が開きます。</p>
+        </div>
+
+        <form class="quiz" id="quizForm">
+          <div class="question" data-answer="b">
+            <h4>1. 角加速度の式で、単に q̈ᵢ を足すだけでなく ωᵢ₋₁ × (zᵢ q̇ᵢ) が現れる理由は？</h4>
+            <label class="option"><input type="radio" name="q1" value="a">関節トルクを重力方向へ射影するため。</label>
+            <label class="option"><input type="radio" name="q1" value="b">前リンクと一緒に回転する座標系でベクトルを微分すると、軸の向きの変化による成分が出るため。</label>
+            <label class="option"><input type="radio" name="q1" value="c">慣性行列 M(q) を対称に保つため。</label>
+            <div class="explain">この外積項は、回転している座標系から見た関節軸方向ベクトルの時間微分に由来します。大きさだけでなく「向きが変わる」ことも加速度を生みます。</div>
+          </div>
+
+          <div class="question" data-answer="c">
+            <h4>2. 重心加速度の式に出てくる ω × (ω × r) は何を意味する？</h4>
+            <label class="option"><input type="radio" name="q2" value="a">重力補償トルク。</label>
+            <label class="option"><input type="radio" name="q2" value="b">角加速度が作る接線加速度。</label>
+            <label class="option"><input type="radio" name="q2" value="c">向心加速度。</label>
+            <div class="explain">二重の外積は、回転している点が中心方向へ向かう向心加速度の3次元ベクトル表現です。α × r は接線加速度として区別します。</div>
+          </div>
+
+          <div class="question" data-answer="a">
+            <h4>3. τᵢ = zᵢᵀ nᵢ のように、関節軸ベクトル z との内積を取る理由は？</h4>
+            <label class="option"><input type="radio" name="q3" value="a">モータが駆動できる関節軸方向のモーメントだけを取り出すため。</label>
+            <label class="option"><input type="radio" name="q3" value="b">全方向のモーメントを平均するため。</label>
+            <label class="option"><input type="radio" name="q3" value="c">慣性行列を対称にするため。</label>
+            <div class="explain">関節は構造的に動ける方向が決まっています。軸方向以外の成分は軸受けなどの反力として扱われます。</div>
+          </div>
+
+          <div class="question" data-answer="b">
+            <h4>4. ニュートン・オイラー法で、加速度は根元から先端へ、力・モーメントは先端から根元へ計算する理由は？</h4>
+            <label class="option"><input type="radio" name="q4" value="a">先端リンクほど座標変換が少なく、先に計算しやすいから。</label>
+            <label class="option"><input type="radio" name="q4" value="b">動きは親リンクから伝わり、負荷は先端側にぶら下がる全リンク分を根元へ集約する必要があるから。</label>
+            <label class="option"><input type="radio" name="q4" value="c">重力項を外向き計算だけで完全に消せるから。</label>
+            <div class="explain">速度・加速度は親リンクの運動を土台に決まり、力・モーメントは先端側の負荷を支えるため根元へ集まります。この因果の向きが往復計算になります。</div>
+          </div>
+
+          <div class="question" data-answer="a">
+            <h4>5. 直動関節で τᵢ を求めるとき、モーメント n ではなく力 f を使う理由は？</h4>
+            <label class="option"><input type="radio" name="q5" value="a">直動関節の駆動源は回転ではなく並進方向の力であり、τ は一般化力として統一表記されているから。</label>
+            <label class="option"><input type="radio" name="q5" value="b">直動関節では重力が働かないから。</label>
+            <label class="option"><input type="radio" name="q5" value="c">直動関節ではリンクの慣性テンソルが不要だから。</label>
+            <div class="explain">回転関節の駆動量はトルク、直動関節の駆動量は力です。ただし運動方程式では、どちらも一般化力として τ で統一できます。</div>
+          </div>
+
+          <div class="question" data-answer="a">
+            <h4>6. 慣性行列 M(q) が正定値かつ対称であることは何を保証している？</h4>
+            <label class="option"><input type="radio" name="q6" value="a">運動エネルギーが物理的に正であり、負の質量のような不自然な状態が起きないこと。</label>
+            <label class="option"><input type="radio" name="q6" value="b">すべての関節トルクが常にゼロになること。</label>
+            <label class="option"><input type="radio" name="q6" value="c">摩擦やバックラッシも完全にモデル化できること。</label>
+            <div class="explain">正定値性はエネルギーが正であること、対称性は物理的整合性を示します。制御の安定性証明やシミュレーション検算にも効きます。</div>
+          </div>
+
+          <div class="question" data-answer="c">
+            <h4>7. 自由度が10以上ある複雑なロボットで、ラグランジュ法よりニュートン・オイラー法が選ばれやすい最大の理由は？</h4>
+            <label class="option"><input type="radio" name="q7" value="a">ニュートン・オイラー法では重心位置を入力しなくてよいから。</label>
+            <label class="option"><input type="radio" name="q7" value="b">ニュートン・オイラー法では座標変換が不要だから。</label>
+            <label class="option"><input type="radio" name="q7" value="c">隣り合うリンク間の関係を漸次的に計算でき、数式爆発を避けやすいから。</label>
+            <div class="explain">ラグランジュ法は自由度が増えるとシンボリックな式展開が重くなります。ニュートン・オイラー法はリレー形式で実装しやすいのが強みです。</div>
+          </div>
+
+          <div class="question" data-answer="b">
+            <h4>8. 運動方程式の h(q, q̇) 項は、関節速度 q̇ が0のときどうなる？</h4>
+            <label class="option"><input type="radio" name="q8" value="a">姿勢 q に依存して大きくなる。</label>
+            <label class="option"><input type="radio" name="q8" value="b">0になる。</label>
+            <label class="option"><input type="radio" name="q8" value="c">重力項 g(q) と同じ値になる。</label>
+            <div class="explain">遠心力やコリオリ力は速度に依存して発生します。静止状態では h(q, q̇) は消え、基本的には重力項が残ります。</div>
+          </div>
+
+          <div class="question" data-answer="b">
+            <h4>9. 重力補償を実装してもロボットが完全に静止しない場合、基本的な運動方程式が考慮していない物理現象として考えやすいものは？</h4>
+            <label class="option"><input type="radio" name="q9" value="a">関節角度 q。</label>
+            <label class="option"><input type="radio" name="q9" value="b">静止摩擦・動摩擦、減速機のバックラッシなど。</label>
+            <label class="option"><input type="radio" name="q9" value="c">重心位置 s。</label>
+            <div class="explain">重心位置は動力学パラメータとして入りますが、摩擦やバックラッシは基本的な剛体運動方程式から外して扱われることが多いです。</div>
+          </div>
+
+          <div class="question" data-answer="a">
+            <h4>10. インピーダンス制御でロボットの「見かけの質量」を変えるには、運動方程式のどの項を打ち消す考え方が必要？</h4>
+            <label class="option"><input type="radio" name="q10" value="a">ロボット自身の慣性 M(q) をキャンセルし、望みの仮想慣性 M_d を上書きする。</label>
+            <label class="option"><input type="radio" name="q10" value="b">関節軸 z をゼロにして、すべてのトルクを消す。</label>
+            <label class="option"><input type="radio" name="q10" value="c">重力項 g(q) だけを2倍にする。</label>
+            <div class="explain">インピーダンス制御では、ロボット本来の慣性をモデルやセンサで補償し、仮想的な慣性・粘性・剛性を感じさせる「動特性の書き換え」を行います。</div>
+          </div>
+
+          <div class="quiz-actions">
+            <div class="score" id="scoreText">Score: 未採点</div>
+            <div>
+              <button class="button secondary" type="reset" id="resetBtn">リセット</button>
+              <button class="button" type="button" id="gradeBtn">採点する</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <footer class="footer">
+        Source focus: 『実戦ロボット制御』第9章「ロボットの運動方程式」および提示資料の要点整理。目的は、ニュートン・オイラー法を概念から実装手順へ接続することです。
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    const form = document.getElementById("quizForm");
+    const gradeBtn = document.getElementById("gradeBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const scoreText = document.getElementById("scoreText");
+    const questions = Array.from(document.querySelectorAll(".question"));
+
+    function clearMarks() {
+      questions.forEach((question) => {
+        question.querySelectorAll(".option").forEach((option) => {
+          option.classList.remove("correct", "wrong");
+        });
+        question.querySelector(".explain").style.display = "none";
+      });
+      scoreText.textContent = "Score: 未採点";
+      document.querySelector(".progress-box strong").textContent = "実務で書ける";
+    }
+
+    gradeBtn.addEventListener("click", () => {
+      let score = 0;
+      questions.forEach((question, index) => {
+        const answer = question.dataset.answer;
+        const selected = form.querySelector(`input[name="q${index + 1}"]:checked`);
+        question.querySelectorAll(".option").forEach((option) => {
+          const input = option.querySelector("input");
+          option.classList.remove("correct", "wrong");
+          if (input.value === answer) option.classList.add("correct");
+          if (selected && input === selected && input.value !== answer) option.classList.add("wrong");
+        });
+        if (selected && selected.value === answer) score += 1;
+        question.querySelector(".explain").style.display = "block";
+      });
+      const total = questions.length;
+      const percent = Math.round((score / total) * 100);
+      scoreText.textContent = `Score: ${score}/${total} (${percent}%)`;
+      document.querySelector(".progress-box strong").textContent = `${percent}%`;
+    });
+
+    resetBtn.addEventListener("click", () => {
+      window.setTimeout(clearMarks, 0);
+    });
+  </script>
+</body>
+</html>

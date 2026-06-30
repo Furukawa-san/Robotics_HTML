@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>実戦ロボティクス10章 運動方程式とロボット制御 内容まとめ</title>
+  <style>
+    :root {
+      --bg: #080808;
+      --paper: #111112;
+      --paper-2: #171719;
+      --ink: #f5f0e8;
+      --muted: #bdb5aa;
+      --dim: #7f786e;
+      --rule: rgba(245, 240, 232, .16);
+      --accent: #d4a64f;
+      --accent-2: #82b7ff;
+      --ok: #7fd6a3;
+      --bad: #ff9274;
+      --max: 1120px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Gelasio", "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif;
+      line-height: 1.82;
+      letter-spacing: 0;
+    }
+    .page { width: min(var(--max), calc(100vw - 40px)); margin: 0 auto; }
+    header {
+      min-height: 72vh;
+      display: grid;
+      align-items: end;
+      padding: 76px 0 54px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .kicker, .section-label, .quiz-number {
+      color: var(--accent);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      font-size: 13px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 18px 0 0;
+      max-width: 980px;
+      font-size: clamp(42px, 7.6vw, 86px);
+      line-height: .99;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+    .thesis {
+      max-width: 900px;
+      margin-top: 30px;
+      font-size: clamp(20px, 2.4vw, 30px);
+      line-height: 1.55;
+      color: var(--ink);
+    }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+    .chip {
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      color: var(--muted);
+      font-size: 13px;
+      background: rgba(255,255,255,.035);
+    }
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      display: flex;
+      gap: 8px;
+      padding: 12px 0;
+      margin-bottom: 38px;
+      background: rgba(8,8,8,.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--rule);
+      overflow-x: auto;
+    }
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      white-space: nowrap;
+      padding: 7px 10px;
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      font-size: 14px;
+    }
+    nav a:hover, nav a:focus-visible { color: var(--ink); outline: none; }
+    section { padding: 42px 0; border-bottom: 1px solid var(--rule); }
+    h2 { margin: 0 0 24px; font-size: clamp(32px, 5vw, 56px); line-height: 1.08; }
+    h3 { margin: 34px 0 10px; font-size: clamp(22px, 3vw, 32px); line-height: 1.24; }
+    h4 { margin: 26px 0 8px; font-size: 21px; color: var(--ink); }
+    h5, h6 {
+      margin: 22px 0 6px;
+      font-size: 18px;
+      color: var(--accent);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+    }
+    p { margin: 0 0 16px; color: var(--muted); font-size: 17px; }
+    strong { color: var(--ink); font-weight: 700; }
+    code {
+      color: #d8e9ff;
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      background: rgba(127,182,255,.12);
+      border: 1px solid rgba(127,182,255,.22);
+      border-radius: 4px;
+      padding: 0 5px;
+    }
+    .equation-strip, .summary-grid, .quiz-grid { display: grid; gap: 16px; }
+    .equation-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 26px 0 18px; }
+    .summary-grid, .quiz-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .equation, .summary-card, .quiz-card, .core-body {
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+    }
+    .equation {
+      padding: 16px;
+      color: var(--ink);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .basics-lead {
+      max-width: 940px;
+      padding: 22px 24px;
+      border: 1px solid rgba(212,166,79,.34);
+      border-radius: 6px;
+      background: rgba(212,166,79,.08);
+      margin-bottom: 18px;
+    }
+    .basics-lead p { margin-bottom: 0; color: var(--ink); }
+    .basics-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr);
+      gap: 16px;
+    }
+    .basics-card {
+      padding: 22px;
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+      min-width: 0;
+    }
+    .basics-card h3 {
+      margin: 0 0 10px;
+      font-size: 23px;
+      color: var(--ink);
+    }
+    .basics-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .basics-table th, .basics-table td {
+      border-top: 1px solid var(--rule);
+      padding: 11px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .basics-table th { color: var(--ink); font-weight: 700; }
+    .derivation-flow {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .derivation-flow > div {
+      padding: 16px;
+      border: 1px solid rgba(127,182,255,.24);
+      border-radius: 6px;
+      background: rgba(127,182,255,.07);
+    }
+    .derivation-flow strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--ink);
+      font-size: 15px;
+    }
+    .derivation-flow span { display: block; margin-bottom: 10px; }
+    .derivation-flow p { margin-bottom: 0; font-size: 15px; }
+    .basics-note {
+      margin-top: 16px;
+      padding: 16px 18px;
+      border-left: 3px solid var(--accent);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+    }
+
+
+    .source-basics {
+      display: grid;
+      gap: 18px;
+    }
+    .source-basics .card {
+      padding: 24px;
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+      overflow: hidden;
+    }
+    .source-basics .toc ol {
+      margin: 10px 0 0 1.2em;
+      padding: 0;
+      color: var(--muted);
+    }
+    .source-basics .toc a {
+      color: var(--accent-2);
+      text-decoration: none;
+    }
+    .source-basics h2 {
+      margin: 0 0 18px;
+      padding-left: 12px;
+      border-left: 4px solid var(--accent);
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1.22;
+    }
+    .source-basics h3 {
+      margin: 28px 0 10px;
+      font-size: 22px;
+      color: var(--ink);
+    }
+    .source-basics h4 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      color: var(--ink);
+    }
+    .source-basics .eq {
+      max-width: 100%;
+      margin: 14px 0;
+      padding: 14px 16px;
+      border: 1px solid rgba(127,182,255,.26);
+      border-radius: 6px;
+      background: rgba(127,182,255,.075);
+      color: var(--ink);
+      overflow-x: auto;
+      overflow-y: hidden;
+      overflow-wrap: normal;
+      white-space: normal;
+      -webkit-overflow-scrolling: touch;
+    }
+    .source-basics .eq mjx-container {
+      display: inline-block !important;
+      min-width: max-content;
+      max-width: none !important;
+      overflow: visible !important;
+    }
+    .source-basics .eq mjx-container[jax="CHTML"][display="true"] {
+      margin: 0 !important;
+      padding: 2px 0;
+    }
+    .source-basics mjx-container:not([display="true"]) {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      vertical-align: baseline;
+    }
+    .source-basics .note,
+    .source-basics .green,
+    .source-basics .warn {
+      margin: 16px 0;
+      padding: 14px 16px;
+      border-radius: 6px;
+      color: var(--muted);
+    }
+    .source-basics .note {
+      border: 1px solid rgba(127,182,255,.28);
+      background: rgba(127,182,255,.08);
+    }
+    .source-basics .green {
+      border: 1px solid rgba(127,214,163,.28);
+      background: rgba(127,214,163,.08);
+    }
+    .source-basics .warn {
+      border: 1px solid rgba(255,146,116,.32);
+      background: rgba(255,146,116,.08);
+    }
+    .source-basics .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px;
+    }
+    .source-basics .mini {
+      padding: 16px;
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      background: rgba(8,8,8,.32);
+    }
+    .source-basics table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .source-basics th,
+    .source-basics td {
+      padding: 12px 12px;
+      border: 1px solid var(--rule);
+      vertical-align: top;
+      text-align: left;
+    }
+    .source-basics th {
+      color: var(--ink);
+      background: rgba(255,255,255,.045);
+    }
+    .source-basics mjx-container {
+      color: #d8e9ff;
+      outline: none;
+    }
+
+    .summary-card { padding: 24px; }
+    .summary-card h3 { margin-top: 0; color: var(--ink); font-size: 24px; }
+    .quiz-panel {
+      margin: 30px 0 34px;
+      padding: 26px;
+      background: linear-gradient(180deg, rgba(127,182,255,.10), rgba(255,255,255,.035));
+      border: 1px solid rgba(127,182,255,.24);
+      border-radius: 6px;
+    }
+    .quiz-card { min-width: 0; padding: 20px; background: rgba(8,8,8,.48); }
+    .quiz-card h3 { margin: 8px 0 10px; font-size: 21px; }
+    .quiz-question { color: var(--ink); font-size: 16px; line-height: 1.68; }
+    .quiz-choices { display: grid; gap: 9px; margin-top: 14px; }
+    .quiz-choice {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 10px;
+      align-items: start;
+      min-height: 44px;
+      padding: 12px;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      background: rgba(255,255,255,.035);
+      color: var(--muted);
+      font: inherit;
+      font-size: 15px;
+      line-height: 1.58;
+      text-align: left;
+      cursor: pointer;
+    }
+    .quiz-choice:hover, .quiz-choice:focus-visible {
+      border-color: rgba(212,166,79,.7);
+      color: var(--ink);
+      outline: none;
+    }
+    .choice-mark {
+      display: inline-grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--rule);
+      border-radius: 50%;
+      color: var(--accent);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      font-size: 13px;
+    }
+    .quiz-choice.is-correct { border-color: rgba(127,214,163,.7); background: rgba(127,214,163,.10); color: var(--ink); }
+    .quiz-choice.is-wrong { border-color: rgba(255,146,116,.7); background: rgba(255,146,116,.10); color: var(--ink); }
+    .quiz-feedback {
+      display: none;
+      margin-top: 14px;
+      padding: 14px;
+      border-left: 3px solid var(--accent);
+      background: rgba(212,166,79,.08);
+    }
+    .quiz-feedback.is-visible { display: block; }
+    .feedback-label {
+      margin-bottom: 6px;
+      color: var(--ink);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .quiz-feedback p { margin-bottom: 0; font-size: 15px; line-height: 1.72; }
+    .core {
+      background: var(--paper);
+      margin: 0 calc(50% - 50vw);
+      padding-left: max(20px, calc((100vw - var(--max)) / 2));
+      padding-right: max(20px, calc((100vw - var(--max)) / 2));
+    }
+    .core-inner { max-width: 920px; }
+    .core-body { margin-top: 26px; padding: 26px; background: var(--paper-2); }
+    .core-body ul { margin: 0 0 18px 1.2em; padding: 0; color: var(--muted); }
+    .core-body li { margin: 8px 0; }
+    .core-body hr { border: 0; border-top: 1px solid var(--rule); margin: 34px 0; }
+    .math {
+      color: #d8e9ff;
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      background: rgba(127,182,255,.12);
+      border: 1px solid rgba(127,182,255,.25);
+      border-radius: 4px;
+      padding: 0 5px;
+      white-space: nowrap;
+    }
+    .dot, .ddot { position: relative; display: inline-block; padding-top: .2em; line-height: 1; }
+    .dot::before, .ddot::before {
+      position: absolute;
+      left: 50%;
+      top: -.42em;
+      transform: translateX(-50%);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .dot::before { content: "."; }
+    .ddot::before { content: ".."; letter-spacing: -.05em; }
+    footer {
+      padding: 34px 0 52px;
+      color: var(--dim);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      font-size: 13px;
+    }
+    @media (max-width: 840px) {
+      .page { width: min(100vw - 32px, var(--max)); }
+      header { min-height: 62vh; padding-top: 48px; }
+      .summary-grid, .equation-strip, .quiz-grid, .basics-grid, .derivation-flow, .source-basics .grid { grid-template-columns: 1fr; }
+      .core-body, .quiz-panel { padding: 18px; }
+      p { font-size: 16px; }
+      .source-basics .eq {
+        padding: 12px;
+        font-size: 14px;
+      }
+      .source-basics .eq mjx-container[jax="CHTML"][display="true"] {
+        font-size: 92% !important;
+      }
+      .source-basics table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+    @media (max-width: 480px) {
+      .page { width: min(100vw - 24px, var(--max)); }
+      .source-basics .eq {
+        padding: 10px;
+        font-size: 13px;
+      }
+      .source-basics .eq mjx-container[jax="CHTML"][display="true"] {
+        font-size: 86% !important;
+      }
+    }
+  </style>
+
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+      chtml: { displayAlign: 'left', linebreaks: { automatic: false } },
+      options: { enableMenu: false }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div>
+        <div class="kicker">Chapter 10 / Dynamics And Robot Control</div>
+        <h1>実戦ロボティクス10章<br>運動方程式とロボット制御</h1>
+        <p class="thesis">運動方程式を使うと、ロボットを単に位置へ動かすだけでなく、安定性・重力補償・手先の加速度・柔らかさまで設計できる。</p>
+        <div class="meta">
+          <span class="chip">visual-html-renderer information design</span>
+          <span class="chip">editorial dark</span>
+          <span class="chip">要約 + コア内容 + 10問クイズ</span>
+          <span class="chip">generated 2026-06-29 17:01</span>
+        </div>
+      </div>
+    </header>
+    <nav aria-label="ページ内ナビゲーション">
+      <a href="#basics">基本事項</a>
+      <a href="#summary">要約</a>
+      <a href="#core">コア内容</a>
+      <a href="#quiz">10問クイズ</a>
+    </nav>
+
+
+    <section id="basics">
+      <div class="section-label">Fundamentals</div>
+      <h2>基本事項：運動方程式の行列表現をニュートンオイラーから導出</h2>
+      <div class="source-basics">
+        <section class="card toc">
+    <h2>このHTMLの目的</h2>
+    <p>ロボットの運動方程式</p>
+    <div class="eq">\[ M(q)\ddot q + C(q,\dot q)\dot q + g(q)=\tau \]</div>
+    <p>は、いきなり出てくる式ではありません。もとは各リンクに対する</p>
+    <div class="eq">\[ \sum F = ma, \qquad \sum \tau = I\alpha + \omega \times (I\omega) \]</div>
+    <p>というニュートン・オイラー方程式です。これを「関節トルク」の形に集約すると、上の行列形式になります。</p>
+    <ol>
+      <li><a href="#ne-basic">基本構造：並進も回転も重力も関節トルクに直す</a></li>
+      <li><a href="#euler-terms">オイラー方程式の各項の意味</a></li>
+      <li><a href="#ne-planar">2次元2リンク：行列の中身まで導出</a></li>
+      <li><a href="#ne-three-d">3次元2リンク：ニュートン・オイラー再帰での整理</a></li>
+      <li><a href="#ne-compare">2Dと3Dの違い</a></li>
+    </ol>
+  </section>
+
+  <section class="card" id="euler-terms">
+    <h2>オイラー方程式の各項の意味</h2>
+    <p>剛体の3次元回転では、回転に必要なモーメントを次のように書けます。</p>
+    <div class="eq">\[ N = I\dot{\omega} + \omega \times (I\omega) \]</div>
+    <p>ここで \(\omega\) は「今どの向きの軸で回っているか」を表す角速度、\(I\) は物体の形状や質量分布を表す慣性テンソル、\(L=I\omega\) は角運動量です。</p>
+    <div class="grid">
+      <div class="mini">
+        <h4>\(\omega\)：現在の回転軸</h4>
+        <p>物体がいま実際にどの方向を軸として回っているかを表します。回転運動における現在の進行方向のような量です。</p>
+      </div>
+      <div class="mini">
+        <h4>\(I\)：回転の地図・地形</h4>
+        <p>物体の形状や質量分布から決まる「どの軸まわりに回りやすいか」の地図です。主慣性軸は、その地形の中で素直に回りやすい道筋と考えられます。</p>
+      </div>
+      <div class="mini">
+        <h4>\(L=I\omega\)：回転運動の本流</h4>
+        <p>現在の回転軸 \(\omega\) が、回転の地形 \(I\) を通った結果として決まる角運動量です。外部トルクがなければ保存されやすい方向を表します。</p>
+      </div>
+    </div>
+    <h3>角加速度項 \(I\dot{\omega}\)</h3>
+    <p>\(I\dot{\omega}\) は、回転速度そのものを変えるための項です。「この軸まわりにもっと速く回したい」「回転を止めたい」ときに必要な、回転版の慣性項です。</p>
+    <h3>ジャイロ項 \(\omega \times (I\omega)\)</h3>
+    <p>\(\omega \times (I\omega)\) は、現在の回転軸 \(\omega\) と角運動量 \(L=I\omega\) がずれることで現れる項です。3次元では物体の形状や質量分布のため、\(\omega\) と \(L\) が同じ方向を向くとは限りません。</p>
+    <p>直感的には、ジャイロ項は<strong>今の回転軸 \(\omega\) を、角運動量 \(L=I\omega\) が導く方向に移動・回り込みさせようとする回転特有の項</strong>です。回転の地形 \(I\) の上で、現在の回転軸が角運動量という本流に沿うように曲げられる効果、と見ると理解しやすくなります。</p>
+    <div class="note">
+      <b>注意：</b>摩擦や損失がない剛体では、\(\omega\) が \(L\) に一直線に吸い寄せられて一致するわけではありません。空間中で保存される角運動量 \(L\) の制約を受けながら、\(\omega\) が回り込む、つまり歳差運動のように振る舞います。
+    </div>
+  </section>
+
+  <section class="card" id="ne-basic">
+    <h2>1. 基本構造：力を関節トルクへ集約する</h2>
+    <p>各リンクには、大きく3種類の寄与があります。</p>
+    <div class="grid">
+      <div class="mini">
+        <h4>① 並進運動</h4>
+        <div class="eq">\[ F_i=m_i a_{ci} \]</div>
+        <p>重心を加速させるための力。</p>
+      </div>
+      <div class="mini">
+        <h4>② 回転運動</h4>
+        <div class="eq">\[ N_i=I_i\alpha_i+\omega_i\times(I_i\omega_i) \]</div>
+        <p>リンク自身を回転させるためのモーメント。</p>
+      </div>
+      <div class="mini">
+        <h4>③ 重力</h4>
+        <div class="eq">\[ F_{gi}=m_i g \]</div>
+        <p>重心に働く重力。</p>
+      </div>
+    </div>
+    <p>ただし、モータや筋が発生するのは関節トルクです。そのため、重心に働く力は関節まわりのモーメントへ変換します。</p>
+    <div class="eq">\[ \tau_{F,i}=r_{ci}\times F_i, \qquad \tau_{g,i}=r_{ci}\times F_{gi} \]</div>
+    <div class="note">
+      <b>要点：</b>並進運動も重力も、最終的には「その力を関節で作るにはどれだけのトルクが必要か？」という形に直して足します。
+    </div>
+    <p>そのため、ざっくり書くと各リンクの関節トルクへの寄与は</p>
+    <div class="eq">\[ \tau_i \sim r_i\times m_i a_i + I_i\alpha_i + \omega_i\times(I_i\omega_i) + r_i\times m_i g \]</div>
+    <p>です。これを全リンク分足し、\(q,\dot q,\ddot q\) で整理すると行列形式になります。</p>
+  </section>
+
+  <section class="card" id="ne-planar">
+    <h2>2. 2次元2リンク機構</h2>
+    <h3>2.1 モデル設定</h3>
+    <p>平面内で動く2リンクを考えます。関節角は</p>
+    <div class="eq">\[ q=\begin{bmatrix}q_1\\q_2\end{bmatrix} \]</div>
+    <p>リンク長を \(l_1,l_2\)、各リンクの重心までの距離を \(r_1,r_2\)、質量を \(m_1,m_2\)、重心まわり慣性モーメントを \(I_1,I_2\) とします。</p>
+
+    <h3>2.2 重心位置</h3>
+    <p>リンク1重心位置：</p>
+    <div class="eq">\[ p_{c1}=r_1\begin{bmatrix}\cos q_1\\\sin q_1\end{bmatrix} \]</div>
+    <p>リンク2重心位置：</p>
+    <div class="eq">\[ p_{c2}=l_1\begin{bmatrix}\cos q_1\\\sin q_1\end{bmatrix}+r_2\begin{bmatrix}\cos(q_1+q_2)\\\sin(q_1+q_2)\end{bmatrix} \]</div>
+
+    <h3>2.3 重心加速度</h3>
+    <p>位置を2回微分すると、重心加速度が得られます。リンク1は</p>
+    <div class="eq">\[
+      a_{c1}=r_1\ddot q_1\begin{bmatrix}-\sin q_1\\\cos q_1\end{bmatrix}
+      -r_1\dot q_1^2\begin{bmatrix}\cos q_1\\\sin q_1\end{bmatrix}
+    \]</div>
+    <p>リンク2は</p>
+    <div class="eq">\[
+    \begin{aligned}
+      a_{c2}=&l_1\ddot q_1\begin{bmatrix}-\sin q_1\\\cos q_1\end{bmatrix}
+      -l_1\dot q_1^2\begin{bmatrix}\cos q_1\\\sin q_1\end{bmatrix}\\
+      &+r_2(\ddot q_1+\ddot q_2)\begin{bmatrix}-\sin(q_1+q_2)\\\cos(q_1+q_2)\end{bmatrix}\\
+      &-r_2(\dot q_1+\dot q_2)^2\begin{bmatrix}\cos(q_1+q_2)\\\sin(q_1+q_2)\end{bmatrix}
+    \end{aligned}
+    \]</div>
+    <div class="green">
+      \(\ddot q\) が含まれる部分は慣性項 \(M(q)\ddot q\) へ、\(\dot q^2\) や \(\dot q_1\dot q_2\) が含まれる部分は速度依存項 \(C(q,\dot q)\dot q\) へ入ります。
+    </div>
+
+    <h3>2.4 ニュートン・オイラー方程式</h3>
+    <p>各リンクに対して</p>
+    <div class="eq">\[ F_i=m_i a_{ci} \]</div>
+    <p>平面回転なので角速度はz軸方向だけです。</p>
+    <div class="eq">\[ \omega_i=\begin{bmatrix}0\\0\\\dot\theta_i\end{bmatrix},\qquad I_i\omega_i=\begin{bmatrix}0\\0\\I_i\dot\theta_i\end{bmatrix} \]</div>
+    <p>したがって</p>
+    <div class="eq">\[ \omega_i\times(I_i\omega_i)=0 \]</div>
+    <p>となり、平面2リンクでは回転式は</p>
+    <div class="eq">\[ N_1=I_1\ddot q_1,\qquad N_2=I_2(\ddot q_1+\ddot q_2) \]</div>
+    <p>だけで済みます。</p>
+
+    <h3>2.5 関節トルクへ集約する</h3>
+    <p>関節2はリンク2だけを動かすので、リンク2重心に必要な力とリンク2自身の回転トルクを足します。</p>
+    <div class="eq">\[
+      \tau_2 = I_2(\ddot q_1+\ddot q_2) + r_2 e_2 \times m_2 a_{c2} + g_2(q)
+    \]</div>
+    <p>ここで</p>
+    <div class="eq">\[ e_2=\begin{bmatrix}\cos(q_1+q_2)\\\sin(q_1+q_2)\end{bmatrix} \]</div>
+    <p>展開すると</p>
+    <div class="eq">\[
+    \tau_2=
+    \left(I_2+m_2r_2^2+m_2l_1r_2\cos q_2\right)\ddot q_1
+    +\left(I_2+m_2r_2^2\right)\ddot q_2
+    +m_2l_1r_2\sin q_2\dot q_1^2
+    +g_2(q)
+    \]</div>
+
+    <p>関節1はリンク1とリンク2全体を動かすので、両方のリンクの寄与を足します。</p>
+    <div class="eq">\[
+      \tau_1 = I_1\ddot q_1+r_1e_1\times m_1a_{c1}+I_2(\ddot q_1+\ddot q_2)+r_{c2}\times m_2a_{c2}+g_1(q)
+    \]</div>
+    <p>展開すると</p>
+    <div class="eq">\[
+    \begin{aligned}
+    \tau_1=&\left[I_1+I_2+m_1r_1^2+m_2(l_1^2+r_2^2+2l_1r_2\cos q_2)\right]\ddot q_1\\
+    &+\left[I_2+m_2(r_2^2+l_1r_2\cos q_2)\right]\ddot q_2\\
+    &-m_2l_1r_2\sin q_2(2\dot q_1\dot q_2+\dot q_2^2)+g_1(q)
+    \end{aligned}
+    \]</div>
+
+    <h3>2.6 行列形式</h3>
+    <p>ここで</p>
+    <div class="eq">\[ h=m_2l_1r_2\sin q_2 \]</div>
+    <p>とおくと、2リンク平面機構の運動方程式は</p>
+    <div class="eq">\[
+    \begin{bmatrix}\tau_1\\\tau_2\end{bmatrix}
+    =
+    \begin{bmatrix}m_{11}&m_{12}\\m_{21}&m_{22}\end{bmatrix}
+    \begin{bmatrix}\ddot q_1\\\ddot q_2\end{bmatrix}
+    +
+    \begin{bmatrix}-h(2\dot q_1\dot q_2+\dot q_2^2)\\h\dot q_1^2\end{bmatrix}
+    +
+    \begin{bmatrix}g_1(q)\\g_2(q)\end{bmatrix}
+    \]</div>
+
+    <p>慣性行列の中身は</p>
+    <div class="eq">\[
+    M(q)=\begin{bmatrix}
+    I_1+I_2+m_1r_1^2+m_2(l_1^2+r_2^2+2l_1r_2\cos q_2) & I_2+m_2(r_2^2+l_1r_2\cos q_2)\\
+    I_2+m_2(r_2^2+l_1r_2\cos q_2) & I_2+m_2r_2^2
+    \end{bmatrix}
+    \]</div>
+
+    <p>速度依存項は</p>
+    <div class="eq">\[
+    C(q,\dot q)\dot q=
+    \begin{bmatrix}-h(2\dot q_1\dot q_2+\dot q_2^2)\\h\dot q_1^2\end{bmatrix}
+    \]</div>
+
+    <p>重力項は、角度の取り方によりますが、\(q_1=0\) を水平軸から測るなら</p>
+    <div class="eq">\[
+    g(q)=
+    \begin{bmatrix}
+    (m_1r_1+m_2l_1)g\cos q_1+m_2r_2g\cos(q_1+q_2)\\
+    m_2r_2g\cos(q_1+q_2)
+    \end{bmatrix}
+    \]</div>
+
+    <div class="note">
+      2Dでは \(\omega\times I\omega\) が0になるため、速度依存項の多くは「重心加速度の中に出てくる遠心・コリオリ成分」から現れます。
+    </div>
+  </section>
+
+  <section class="card" id="ne-three-d">
+    <h2>3. 3次元2リンク機構</h2>
+    <p>3次元では、リンクはx・y・z方向に角速度を持ちます。そのため平面と違って</p>
+    <div class="eq">\[ \omega_i\times(I_i\omega_i) \neq 0 \]</div>
+    <p>になるのが重要です。</p>
+
+    <h3>3.1 3Dでの各リンクのニュートン・オイラー方程式</h3>
+    <p>リンク \(i\) の重心に対して</p>
+    <div class="eq">\[ F_i=m_i a_{ci} \]</div>
+    <p>重心まわりの回転について</p>
+    <div class="eq">\[ N_i=I_i\alpha_i+\omega_i\times(I_i\omega_i) \]</div>
+    <p>ここで \(I_i\) は3×3の慣性テンソルです。</p>
+    <div class="eq">\[
+    I_i=\begin{bmatrix}
+    I_{xx}&I_{xy}&I_{xz}\\
+    I_{yx}&I_{yy}&I_{yz}\\
+    I_{zx}&I_{zy}&I_{zz}
+    \end{bmatrix}
+    \]</div>
+
+    <div class="warn">
+      3Dでは角速度 \(\omega\) と角運動量 \(I\omega\) が同じ方向を向くとは限りません。そのズレが \(\omega\times(I\omega)\) として現れます。
+    </div>
+
+    <h3>3.2 前向き再帰：速度・加速度を求める</h3>
+    <p>ニュートン・オイラー法では、まず根元から先端へ向かって、各リンクの角速度・角加速度・重心加速度を計算します。</p>
+    <div class="eq">\[
+    \omega_i = R_i^T\omega_{i-1}+z_i\dot q_i
+    \]</div>
+    <div class="eq">\[
+    \alpha_i = R_i^T\alpha_{i-1}+z_i\ddot q_i+\omega_i\times z_i\dot q_i
+    \]</div>
+    <div class="eq">\[
+    a_i = R_i^T\left(a_{i-1}+\alpha_{i-1}\times p_i+\omega_{i-1}\times(\omega_{i-1}\times p_i)\right)
+    \]</div>
+    <div class="eq">\[
+    a_{ci}=a_i+\alpha_i\times r_{ci}+\omega_i\times(\omega_i\times r_{ci})
+    \]</div>
+
+    <p>ここで</p>
+    <table>
+      <tr><th>記号</th><th>意味</th></tr>
+      <tr><td>\(R_i\)</td><td>隣のリンク座標系への回転行列</td></tr>
+      <tr><td>\(z_i\)</td><td>関節軸方向の単位ベクトル</td></tr>
+      <tr><td>\(p_i\)</td><td>前リンク原点から現在リンク原点へのベクトル</td></tr>
+      <tr><td>\(r_{ci}\)</td><td>現在リンク原点から重心へのベクトル</td></tr>
+    </table>
+
+    <p>この段階で、\(a_{ci}\) の中には \(\ddot q\) 由来の項と \(\dot q^2\) 由来の項が混ざっています。</p>
+
+    <h3>3.3 各リンクの力・モーメント</h3>
+    <p>前向き再帰で求めた加速度から、リンクに必要な力とモーメントを計算します。</p>
+    <div class="eq">\[ F_i=m_i a_{ci} \]</div>
+    <div class="eq">\[ N_i=I_i\alpha_i+\omega_i\times(I_i\omega_i) \]</div>
+    <p>重力は、基底加速度に \(-g\) を入れる方法でも、あとから重力トルクとして足す方法でも扱えます。</p>
+    <div class="eq">\[ a_0=-g \]</div>
+    <p>と置くと、再帰計算の中に重力が自然に入ります。</p>
+
+    <h3>3.4 後ろ向き再帰：関節に戻す</h3>
+    <p>次に、先端から根元へ戻りながら、各リンクの力・モーメントを親リンクへ伝えます。</p>
+    <div class="eq">\[
+    f_i=F_i+R_{i+1}f_{i+1}
+    \]</div>
+    <div class="eq">\[
+    n_i=N_i+r_{ci}\times F_i+p_{i+1}\times R_{i+1}f_{i+1}+R_{i+1}n_{i+1}
+    \]</div>
+    <p>ここで重要なのは、</p>
+    <div class="eq">\[ r_{ci}\times F_i \]</div>
+    <p>です。これは「重心を加速させるための力」を、リンク原点まわりのモーメントに直している項です。</p>
+
+    <h3>3.5 関節トルクを取り出す</h3>
+    <p>関節が回転関節なら、関節軸方向のモーメント成分だけを取り出します。</p>
+    <div class="eq">\[ \tau_i=z_i^T n_i \]</div>
+    <p>つまり、3Dではモーメント \(n_i\) は3次元ベクトルですが、モータが出すトルクは関節軸まわりの1成分なので、内積で取り出します。</p>
+
+    <h3>3.6 3Dでも最後は同じ行列形式になる</h3>
+    <p>2リンク3D機構でも、関節が2つなら最終的には</p>
+    <div class="eq">\[
+    \begin{bmatrix}\tau_1\\\tau_2\end{bmatrix}
+    =
+    M(q)\begin{bmatrix}\ddot q_1\\\ddot q_2\end{bmatrix}
+    +C(q,\dot q)\begin{bmatrix}\dot q_1\\\dot q_2\end{bmatrix}
+    +g(q)
+    \]</div>
+    <p>となります。</p>
+    <p>ただし3Dでは、\(C(q,\dot q)\dot q\) の中に以下がすべて入ります。</p>
+    <ul>
+      <li>重心加速度から出る遠心項</li>
+      <li>重心加速度から出るコリオリ項</li>
+      <li>回転運動から出るジャイロ項 \(\omega\times(I\omega)\)</li>
+    </ul>
+    <div class="note">
+      つまり、3Dで消えなかった \(\omega\times(I\omega)\) は、最終的な行列形式では \(C(q,\dot q)\dot q\) の一部として整理されます。
+    </div>
+  </section>
+
+  <section class="card" id="ne-compare">
+    <h2>4. 2Dと3Dの違い</h2>
+    <table>
+      <tr><th>項目</th><th>2D平面2リンク</th><th>3D 2リンク</th></tr>
+      <tr>
+        <td>角速度</td>
+        <td>z軸まわりのみ</td>
+        <td>x, y, z成分を持つ</td>
+      </tr>
+      <tr>
+        <td>慣性</td>
+        <td>スカラー \(I_z\)</td>
+        <td>3×3慣性テンソル \(I\)</td>
+      </tr>
+      <tr>
+        <td>\(\omega\times(I\omega)\)</td>
+        <td>基本的に0</td>
+        <td>一般に0ではない</td>
+      </tr>
+      <tr>
+        <td>並進項</td>
+        <td>\(r\times ma\) で関節トルクへ</td>
+        <td>同じく \(r\times ma\) でモーメントへ</td>
+      </tr>
+      <tr>
+        <td>重力項</td>
+        <td>\(r\times mg\) として足す</td>
+        <td>\(a_0=-g\) として再帰に含めることが多い</td>
+      </tr>
+      <tr>
+        <td>最終形</td>
+        <td>\(M\ddot q+C\dot q+g=\tau\)</td>
+        <td>同じく \(M\ddot q+C\dot q+g=\tau\)</td>
+      </tr>
+    </table>
+
+    <h3>最終的な理解</h3>
+    <div class="green">
+      ニュートン・オイラー法は、各リンクに対して「並進の式」と「回転の式」を立て、それらをすべて関節軸まわりのトルクへ集約する方法です。
+    </div>
+    <p>その集約結果を、\(\ddot q\) に比例するもの、\(\dot q\) に依存するもの、重力だけに由来するものへ分けると、</p>
+    <div class="eq">\[ \boxed{M(q)\ddot q+C(q,\dot q)\dot q+g(q)=\tau} \]</div>
+    <p>になります。</p>
+    <p>したがって、行列形式は「抽象的な別物」ではなく、各リンクの</p>
+    <div class="eq">\[ \sum F=ma,\qquad \sum \tau=I\alpha+\omega\times(I\omega) \]</div>
+    <p>を、関節角 \(q\) だけで表した結果です。</p>
+  </section>
+      </div>
+    </section>
+    <section id="summary">
+      <div class="section-label">Summary</div>
+      <h2>要約</h2>
+      <div class="equation-strip" aria-label="章の主要式">
+        <div class="equation"><span class="math">M(q)<span class="ddot">q</span>+h(q,<span class="dot">q</span>)+g(q)=τ</span></div>
+        <div class="equation"><span class="math"><span class="ddot">e</span>+K<sub>v</sub><span class="dot">e</span>+K<sub>p</sub>e=0</span></div>
+        <div class="equation"><span class="math">M<sub>d</sub><span class="ddot">r</span>+D<sub>d</sub>(<span class="dot">r</span>-<span class="dot">r</span><sub>d</sub>)+K<sub>d</sub>(r-r<sub>d</sub>)=f</span></div>
+      </div>
+      <div class="summary-grid">
+        <article class="summary-card"><h3>運動方程式はロボット版の F = ma</h3><p>中心式は <span class="math">M(q)<span class="ddot">q</span> + h(q, <span class="dot">q</span>) + g(q) = τ</span> です。</p>
+<p><span class="math">M(q)</span> は姿勢によって変わる動かしにくさ、<span class="math">h(q,<span class="dot">q</span>)</span> は動くことで出る遠心力・コリオリ力、<span class="math">g(q)</span> は重力、<span class="math">τ</span> はモータが出すトルクです。</p>
+<p>この式は、現在の姿勢・速度と入力トルクから次の加速度を予測し、逆に欲しい加速度から必要トルクを計算する道具です。</p></article>
+<article class="summary-card"><h3>高減速比なら各関節を単純な2次系に近似できる</h3><p>モータ角度と関節角度には <span class="math">q<sub>a</sub> = G<sub>r</sub> q</span>、トルクには <span class="math">τ = G<sub>r</sub>τ<sub>a</sub></span> の関係があります。</p>
+<p>減速比 <span class="math">G<sub>r</sub></span> が大きいと、モータ側の慣性項が支配的になり、アーム側の複雑な非線形項を相対的に小さく見られます。</p>
+<p>その結果、各関節は <span class="math"><span class="ddot">q</span> + K<sub>v</sub>&#x27;<span class="dot">q</span> + K<sub>p</sub>&#x27;(q-q<sub>d</sub>)=0</span> のような、ばねとダンパを持つ2次系として設計しやすくなります。</p></article>
+<article class="summary-card"><h3>重力補償は自重を先回りして支える</h3><p>重力項 <span class="math">g(q)</span> は速度ではなく姿勢だけで決まるため、制御入力に先に足して打ち消せます。</p>
+<p>重力補償を入れると、自重を支えるために高いフィードバックゲインで押さえつける必要が減ります。</p>
+<p>そのため、ロボットを低ゲインで柔らかく動かす、ソフトロボティクス的な制御が可能になります。</p></article>
+<article class="summary-card"><h3>動的制御は非線形項を打ち消して誤差を2次系にする</h3><p>制御入力を <span class="math">τ=M(q)<span class="ddot">q</span><sub>adj</sub>+h(q,<span class="dot">q</span>)+g(q)</span> と作ると、ロボット本来の <span class="math">h</span> と <span class="math">g</span> が式の中で相殺されます。</p>
+<p>修正加速度 <span class="math"><span class="ddot">q</span><sub>adj</sub>=<span class="ddot">q</span><sub>d</sub>+K<sub>v</sub>(<span class="dot">q</span><sub>d</sub>-<span class="dot">q</span>)+K<sub>p</sub>(q<sub>d</sub>-q)</span> を使うと、誤差 <span class="math">e=q-q<sub>d</sub></span> は <span class="math"><span class="ddot">e</span>+K<sub>v</sub><span class="dot">e</span>+K<sub>p</sub>e=0</span> に従います。</p>
+<p>複雑なロボットを、設計しやすい線形な誤差システムとして扱うのが計算トルク法の狙いです。</p></article>
+<article class="summary-card"><h3>手先制御ではヤコビ行列で加速度を変換する</h3><p>手先位置姿勢を <span class="math">r=r(q)</span> と置くと、速度は <span class="math"><span class="dot">r</span>=J<sub>r</sub>(q)<span class="dot">q</span></span> です。</p>
+<p>さらに微分すると <span class="math"><span class="ddot">r</span>=J<sub>r</sub>(q)<span class="ddot">q</span>+<span class="dot">J</span><sub>r</sub>(q)<span class="dot">q</span></span> となり、手先加速度と関節加速度の関係が出ます。</p>
+<p>これを解くことで、関節角ではなく手先の動きそのものを目標通りに制御できます。</p></article>
+<article class="summary-card"><h3>インピーダンス制御は見かけの硬さ・重さ・粘りを設計する</h3><p>目標は <span class="math">M<sub>d</sub><span class="ddot">r</span>+D<sub>d</sub>(<span class="dot">r</span>-<span class="dot">r</span><sub>d</sub>)+K<sub>d</sub>(r-r<sub>d</sub>)=f</span> のように、手先を仮想的な質量・ダンパ・ばねとして振る舞わせることです。</p>
+<p><span class="math">K<sub>d</sub></span> を小さくすれば柔らかく、<span class="math">D<sub>d</sub></span> を大きくすれば振動しにくく、<span class="math">M<sub>d</sub></span> を小さくすれば軽く感じる手先になります。</p>
+<p>人や環境と接触するロボットでは、位置だけでなく力への反応を設計することが重要です。</p></article>
+      </div>
+    </section>
+  </div>
+  <section class="core" id="core">
+    <div class="page core-inner">
+      <div class="section-label">Core Content</div>
+      <h2>コア内容</h2>
+      <p>提示されたTXTの本文を、意味単位ごとに読みやすくHTML化しています。TXT内の10問と回答は、下の選択式クイズとして再構成しています。</p>
+      <section class="quiz-panel" id="quiz" aria-labelledby="quiz-title">
+        <div class="section-label">Quiz</div>
+        <h2 id="quiz-title">10問クイズ</h2>
+        <p>各問の選択肢を選ぶと、正解と詳細解説が表示されます。式の暗記ではなく、物理的な意味と設計判断を確認する構成です。</p>
+        <div class="quiz-grid">
+          
+            <article class="quiz-card">
+              <div class="quiz-number">Q01</div>
+              <h3>atan2の必然性</h3>
+              <p class="quiz-question">逆運動学で単なる <span class="math">tan<sup>-1</sup></span> ではなく <code>atan2(y, x)</code> を使う主な理由はどれでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q1の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>点がどの象限にあるかを符号から判定でき、360度の向きを一意に扱いやすいから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span><code>atan2</code> を使うとヤコビ行列が不要になり、すべての特異姿勢が消えるから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span><code>atan2</code> は角度ではなくトルクを直接計算する関数だから。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>普通の <span class="math">tan<sup>-1</sup></span> は値域が狭く、同じ傾きでも第1象限と第3象限などを区別できません。<code>atan2(y, x)</code> は <span class="math">x</span> と <span class="math">y</span> の符号を別々に見て <span class="math">(-π,π]</span> の範囲で角度を返すため、ロボットが全周囲を動く逆運動学で安全に角度を決められます。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q02</div>
+              <h3>減速比の恩恵</h3>
+              <p class="quiz-question">高減速比が各軸独立制御を実用的にする理由として最も適切なのはどれでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q2の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>モータ側の慣性の影響が支配的になり、アーム側の非線形な干渉の相対的な影響が小さくなるから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>減速比が大きいと重力そのものが物理的に消えるから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>減速比が大きいと、関節角度と手先位置が常に同じ値になるから。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>減速機を通すとモータの回転は関節より大きくなり、モータ慣性は関節側から見ると強く効きます。そのため、ロボットアームの遠心力・コリオリ力・関節間干渉が相対的に目立ちにくくなり、各関節を独立した2次系として近似しやすくなります。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q03</div>
+              <h3>5次多項式を使う理由</h3>
+              <p class="quiz-question">位置だけなら3次多項式でもつながります。それでも5次多項式が好まれる理由はどれでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q3の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>加速度まで滑らかにし、動き出しや停止時の衝撃・振動を減らしやすいから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>5次多項式を使うとモータの最大トルクが無限大になるから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>3次多項式では位置が連続にならないから。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>3次多項式は位置と速度を合わせるには便利ですが、加速度のつながりが悪くなることがあります。加速度が急に変わると躍度が大きくなり、機械に衝撃を与えます。5次多項式なら位置・速度・加速度を境界条件として指定しやすく、振動の少ない軌道を作れます。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q04</div>
+              <h3>特異姿勢の物理的意味</h3>
+              <p class="quiz-question">ヤコビ行列の行列式が0になる特異姿勢では、物理的に何が起きていますか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q4の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>手先をある方向へ動かす能力を失い、その方向へ動かすには計算上非常に大きな関節速度が必要になる。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>ロボットの全関節が必ず停止し、重力も働かなくなる。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>手先速度と関節速度の関係が完全に姿勢と無関係になる。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>特異姿勢ではヤコビ行列のランクが落ち、手先速度を作れる方向が減ります。動けない方向へ無理に速度を出そうとすると、逆行列や疑似逆行列が過大になり、関節速度の指令が暴走します。数学の破綻は、物理的な動けなさの表れです。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q05</div>
+              <h3>重力補償と柔らかさ</h3>
+              <p class="quiz-question">重力補償を入れると、なぜ低ゲインで柔らかい制御にしやすいのでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q5の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>自重を支えるトルクを先に足せるので、位置誤差を高いゲインで無理に押さえ込む必要が減るから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>重力補償を入れると、外力センサなしで接触力が完全にわかるから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>重力補償はヤコビ行列の代わりに手先速度を計算する方法だから。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>重力は姿勢 <span class="math">q</span> で決まる静的なバイアスです。これをあらかじめ <span class="math">g(q)</span> として入力に加えれば、ロボットは自重で垂れ下がりにくくなります。すると、強いばねのような高ゲインで姿勢を固定しなくてもよくなり、人に押されたときに柔らかく応答できます。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q06</div>
+              <h3>非線形項キャンセルのリスク</h3>
+              <p class="quiz-question">運動方程式に基づいて非線形項を打ち消す動的制御の最大の実務リスクはどれでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q6の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>質量・重心・慣性などのモデル誤差があると、キャンセルが不完全になり不安定化する恐れがある。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>非線形項を打ち消すと、ロボットが必ず重力方向へ落下する。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>動的制御では目標軌道を指定できない。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>計算トルク法は、モデルが正しいほど強力です。しかしリンクの質量、重心位置、摩擦、負荷がずれると、打ち消すつもりのトルクが過剰または不足になります。理想的な相殺が崩れるため、高性能化の代わりにモデル同定の難しさというリスクを持ちます。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q07</div>
+              <h3>見かけの質量を設計する</h3>
+              <p class="quiz-question">インピーダンス制御で10kgのアームを手先では1kgのように感じさせるとき、制御則では何をしていますか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q7の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>外力に対する加速度応答を、設計した仮想慣性 <span class="math">M<sub>d</sub></span> に従うように作り替えている。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>実際のアームの質量を機械的に1kgへ変えている。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>手先位置を完全固定し、外力に一切反応しないようにしている。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>インピーダンス制御は、実際の質量を変えるのではなく、外力 <span class="math">f</span> に対する見かけの応答を変えます。<span class="math">M<sub>d</sub></span> を小さく設定すると、同じ外力でも大きく加速するようにモータが助けるため、人には軽い物体のように感じられます。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q08</div>
+              <h3>クオータニオン姿勢補間</h3>
+              <p class="quiz-question">姿勢補間でオイラー角の単純な線形補間よりクオータニオンが有利な理由はどれでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q8の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>ジンバルロックを避けやすく、球面線形補間で滑らかな最短回転を作りやすいから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>クオータニオンを使うと位置制御だけで力制御も完全に不要になるから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>オイラー角は姿勢を表せないため、常に数値が0になるから。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>ロール・ピッチ・ヨー角を成分ごとに直線補間すると、実際の回転としては遠回りになったり、ジンバルロック付近で不安定になったりします。クオータニオンは姿勢を4次元単位ベクトルで表し、SLERPにより滑らかで自然な回転補間を作れます。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q09</div>
+              <h3>順動力学と逆動力学</h3>
+              <p class="quiz-question">一般に、逆動力学より順動力学の計算が重くなりやすい理由はどれでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q9の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>順動力学では <span class="math">M(q)<span class="ddot">q</span>+h+g=τ</span> を <span class="math"><span class="ddot">q</span></span> について解くため、慣性行列の逆計算が必要になるから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>順動力学では位置も速度も一切使えないから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>逆動力学では重力項が必ず0になるから。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>逆動力学は、欲しい <span class="math">q,<span class="dot">q</span>,<span class="ddot">q</span></span> から必要トルク <span class="math">τ</span> を計算します。一方、順動力学は与えた <span class="math">τ</span> から <span class="math"><span class="ddot">q</span></span> を求めるため、慣性行列 <span class="math">M(q)</span> を解く処理が必要です。自由度が増えるほど行列計算が重くなります。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q10</div>
+              <h3>軌道計画と制御の責任分担</h3>
+              <p class="quiz-question">振動対策として、滑らかな軌道計画とインピーダンス制御などの制御はどう分担すべきでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q10の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>軌道計画は振動を起こしにくくする予防、制御は外乱や誤差で出た振動を抑える対策として組み合わせる。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>滑らかな軌道を作れば、外乱や接触に対する制御は常に不要になる。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>高度な制御を入れれば、目標軌道はどれだけ不連続でも問題ない。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>軌道計画は入力指令そのものを滑らかにし、振動の原因を減らす入口の設計です。しかし現実には外乱、摩擦、モデル誤差、接触があるため、発生した振動を制御で減衰させる必要があります。高性能なロボットでは両方が必要です。</p>
+              </div>
+            </article>
+            
+        </div>
+      </section>
+      <div class="core-body">
+        <p>『実戦ロボット制御』第10章「運動方程式とロボット制御」に基づき、この分野の専門家が実務で共有している5つの核となるメンタルモデル（思考の枠組み）を、実用的な知識とともに列挙します。</p>
+<h5>1. 運動方程式を「トルクと加速度の変換器」と捉えるモデル</h5>
+<p>専門家は、ロボットの運動方程式 <span class="math">M(q)<span class="ddot">q</span> + h(q, <span class="dot">q</span>) + g(q) = τ</span> を単なる数式ではなく、<strong>「今の状態（位置・速度）」と「入力（トルク）」から「未来の動き（加速度）」を導き出す変換器</strong>として扱います。</p>
+<ul>
+<li><strong>実務上の知見:</strong> 現在の状態 <span class="math">q, <span class="dot">q</span></span> と、発生させたい加速度 <span class="math"><span class="ddot">q</span></span> を決めれば、必要なトルク <span class="math">τ</span> を一意に計算できるという「逆動力学」の思考が、高度な動的制御の出発点となります。</li>
+</ul>
+<h5>2. 高減速比による「非線形ダイナミクスの無視」という近似モデル</h5>
+<p>各軸に大きな減速比を持つロボット（多くの産業用ロボットなど）では、<strong>複雑な干渉力や重力の影響が、モータ自身の慣性に比べて相対的に小さくなる</strong>という性質を利用します。</p>
+<ul>
+<li><strong>実務上の知見:</strong> 減速比が十分に大きく、フィードバックゲインを高く設定できる場合、各軸を独立した「2次遅れ系」として近似して制御することが可能です。これにより、複雑な計算を省いたシンプルな各軸独立制御が実務上の有力な選択肢となります。</li>
+</ul>
+<h5>3. 重力を「静的なバイアス」として分離・除去するモデル</h5>
+<p>重力項 <span class="math">g(q)</span> は速度に依存せず、位置 <span class="math">q</span> のみによって決まる「バイアス」であると捉えます。</p>
+<ul>
+<li><strong>実務上の知見:</strong> 重力補償（重力を打ち消すトルクをあらかじめ加えること）を行うことで、<strong>小さなゲインでもロボットを静止・安定動作させることが可能</strong>になります。これは、ロボットを「柔らかく」制御する（ソフトロボティクス）ための必須の枠組みです。</li>
+</ul>
+<h5>4. 非線形項の「相殺（キャンセル）」による線形化モデル</h5>
+<p>ロボット本来の複雑な特性（遠心力、コリオリ力、重力）を制御則の中で計算して打ち消すことで、<strong>ロボットを理想的な「ただの質量体」のように振る舞わせる</strong>思考法です。</p>
+<ul>
+<li><strong>実務上の知見:</strong> 運動方程式に基づき非線形項を相殺すると、誤差の応答を <span class="math"><span class="ddot">e</span> + K<sub>v</sub><span class="dot">e</span> + K<sub>p</sub> e = 0</span> というシンプルな線形微分方程式に追い込めます。これにより、制御ゲイン <span class="math">K<sub>p</sub>, K<sub>v</sub></span> を調整するだけで、望み通りの応答特性（収束スピードなど）を設計できるようになります。</li>
+</ul>
+<h5>5. ロボットを「仮想的な物理特性（バネ・マス・ダンパ）」に変えるモデル</h5>
+<p>ロボットの制御目標を「特定の場所へ動かすこと」ではなく、<strong>「外部からの力に対してどう反応するか（インピーダンス）」を設計すること</strong>に置くモデルです。</p>
+<ul>
+<li><strong>実務上の知見:</strong> インピーダンス制御を用いることで、物理的には重いアームを、手先では「1kgの質量と柔らかいバネを持つ物体」のように軽く、柔らかく感じさせることができます。これは、環境や人間と接触するロボットにおいて、安全かつ柔軟な作業を実現するための標準的な思考枠組みです。</li>
+</ul>
+<p>『実戦ロボット制御』第10章「運動方程式とロボット制御」の内容を深く理解するために不可欠な専門用語を、その役割とともに体系的に列挙します。</p>
+<h5>1. 運動方程式の構成要素</h5>
+<p>ロボットの動的な振る舞いを記述する基本式の各項です。</p>
+<ul>
+<li>**慣性行列 <span class="math">M(q)</span>:** ロボットの姿勢に応じた動きにくさ（質量特性）を表す行列。正値対称行列としての性質を持ちます。</li>
+<li>**遠心・コリオリ力項 <span class="math">h(q, <span class="dot">q</span>)</span>:** 速度の2乗に比例して発生する非線形な力。</li>
+<li>**重力項 <span class="math">g(q)</span>:** ロボットの自重によって各関節にかかるトルク。</li>
+<li>**関節トルク <span class="math">τ</span>:** モータなどによって発生させる入力エネルギー。</li>
+</ul>
+<h5>2. フィードバック制御と特性</h5>
+<p>実務的な制御系設計に関わる用語です。</p>
+<ul>
+<li><strong>各軸フィードバック制御:</strong> 各関節を個別に制御する手法。高減速比のロボットで有効です。</li>
+<li>**減速比 (<span class="math">g<sub>ri</sub></span>):** モータの回転を関節に伝える際の回転比。これが大きいと、ロボットの複雑な動特性（非線形項）を相対的に無視しやすくなります。</li>
+<li>**位置・速度フィードバックゲイン (<span class="math">K<sub>p</sub>, K<sub>v</sub></span>):** 誤差を収束させる強さを決める定数行列。</li>
+<li><strong>2次系 (2次の動的システム):</strong> 慣性・バネ・ダンパで構成される物理システム。ロボットの望ましい応答特性の目標モデルとなります。</li>
+</ul>
+<h5>3. 動的制御手法</h5>
+<p>運動方程式の知識を直接利用する高度な制御法です。</p>
+<ul>
+<li><strong>重力補償制御:</strong> 重力の影響 <span class="math">g(q)</span> をあらかじめ計算して打ち消すことで、少ない力で安定した静止・動作を可能にする手法。</li>
+<li><strong>動的制御 (Dynamic Control):</strong> 運動方程式を基に関節の加速度を直接制御する手法。非線形項をキャンセルして線形な応答を実現します。</li>
+<li><strong>修正加速度:</strong> 目標加速度に位置・速度誤差のフィードバックを加味した、実際に入力として用いる加速度。</li>
+<li><strong>インピーダンス制御:</strong> ロボットの手先に仮想的な質量・粘性・弾性を持たせ、外部からの力に対する反応（インピーダンス）を自在に設計する手法。</li>
+</ul>
+<h5>4. 数学的・物理的解析</h5>
+<p>制御の妥当性や安全性を評価するための概念です。</p>
+<ul>
+<li><strong>リアプノフ安定法:</strong> システムがエネルギー的に安定しているかを証明するための数学的枠組み。重力補償の安定性証明などに用いられます。</li>
+<li><strong>漸近安定:</strong> 時間の経過とともに、状態が目標値に確実に収束する性質。</li>
+<li><strong>歪対称行列:</strong> 行列 <span class="math">S = <span class="dot">M</span> - 2C</span>（<span class="math">C</span> はコリオリ項に関連）が持つ、エネルギー保存則に関連する重要な数学的性質。</li>
+<li><strong>ソフトロボティクス:</strong> 重力補償などを活用し、ロボットを物理的に柔らかく制御して人間や環境と安全に接触させる技術。</li>
+</ul>
+<p>これらの用語を関連付けて理解することで、単なる「位置決め」を超えた、ロボットの「力」と「動き」を自在に操る動的制御の理論体系が見えてきます。</p>
+<p>ソースの内容に基づき、ロボット制御の実務や設計において、専門家の間で意見が分かれる（あるいは状況に応じて選択が厳しく対立する）3つの主要なポイントと、それぞれの陣営の主張を整理します。</p>
+<h5>1. 動特性（非線形項）を「無視して制御する」か「モデル化して打ち消す」か</h5>
+<p>ロボットの運動方程式に含まれる複雑な干渉力や遠心・コリオリ力をどう扱うかという対立です。</p>
+<ul>
+<li><strong>「独立軸制御（無視）」陣営の主張:</strong></li>
+<ul>
+<li><strong>主張:</strong> 実務において、産業用ロボットの多くは高い<strong>減速比</strong>を持っており、非線形な干渉力はモータ自身の慣性に比べて十分に小さい。</li>
+<li><strong>強力な根拠:</strong> 各軸を独立した2次系として近似し、高いフィードバックゲインをかければ、モデルの正確な知識がなくても安定して動作する。実用上の堅牢性（ロバスト性）が高い。</li>
+</ul>
+<li><strong>「動的制御（利用）」陣営の主張:</strong></li>
+<ul>
+<li><strong>主張:</strong> 高速動作や、人間と接触する「柔らかいロボット」を実現するには、動特性を無視できない。</li>
+<li><strong>強力な根拠:</strong> 運動方程式に基づき非線形項を計算して打ち消すことで、低ゲインでも目標軌道への追従性能が格段に向上する。ロボットの真の性能を引き出すには物理モデルが不可欠である。</li>
+</ul>
+</ul>
+<h5>2. 軌道計画を「作業空間」で行うか「関節空間」で行うか</h5>
+<p>ロボットを動かす経路を、手先の座標（<span class="math">x, y, z</span>）で設計するか、関節の角度（<span class="math">θ</span>）で設計するかという対立です。</p>
+<ul>
+<li><strong>「作業空間計画」陣営の主張:</strong></li>
+<ul>
+<li><strong>主張:</strong> ロボットの仕事は「手先を直線で動かす」など作業空間で定義されるため、ここで計画するのが自然である。</li>
+<li><strong>強力な根拠:</strong> 作業者が直感的に動きを指定でき、複雑な姿勢変化もクオータニオンなどを用いれば滑らかに補完できる。</li>
+</ul>
+<li><strong>「関節空間計画」陣営の主張:</strong></li>
+<ul>
+<li><strong>主張:</strong> 作業空間での計画は、逆運動学の計算を全時刻で行う必要があり、計算負荷が高い上に<strong>特異姿勢</strong>の問題を避けにくい。</li>
+<li><strong>強力な根拠:</strong> 関節空間で計画すれば、関節の可動範囲や最大速度の制限を直接考慮でき、計算も1度（始点と終点）で済むため、本質的に安全で効率的である。</li>
+</ul>
+</ul>
+<h5>3. 振動対策を「軌道の滑らかさ」で解くか「フィードバック制御」で解くか</h5>
+<p>ロボットが動き出す際や止まる際の振動をどう抑制するかという、アプローチの優先順位に関する対立です。</p>
+<ul>
+<li><strong>「軌道設計（入口）」陣営の主張:</strong></li>
+<ul>
+<li><strong>主張:</strong> 「振動させない軌道」をあらかじめ作ることが最も重要である。</li>
+<li><strong>強力な根拠:</strong> 5次多項式や速度台形制御を用いて、加速度や加加速度（躍度）を連続に設計すれば、機械の共振を叩かずに済む。これにより、制御系に無理をさせずサイクルタイムを短縮できる。</li>
+</ul>
+<li><strong>「アクティブ制御（出口）」陣営の主張:</strong></li>
+<ul>
+<li><strong>主張:</strong> どんなに滑らかな軌道を作っても、外乱やモデルの誤差があれば現実には振動が発生する。それを抑えるのは制御の役割である。</li>
+<li><strong>強力な根拠:</strong> 振動抑制制御やインピーダンス制御などの動的なフィードバックを用いることで、物理的な剛性に頼らずに、発生した振動を素早く減衰させることができる。</li>
+</ul>
+</ul>
+<p>これらの対立は、<strong>「ハードウェアの剛性と減速比が高い従来型の産業用ロボット」</strong>を重視するか、<strong>「軽量・柔軟で高速な次世代ロボット」</strong>を志向するかという、設計思想の違いに根ざしています。</p>
+      </div>
+    </div>
+  </section>
+  <div class="page">
+    <footer>
+      Source: C:\Users\furuk\Desktop\実戦ロボティクス10章.txt<br>
+      Output: C:\Users\furuk\Desktop\thinking\ロボティクスまとめHTML\実戦ロボティクス\実戦ロボティクス10章_運動方程式とロボット制御.html<br>
+      Design: visual-html-renderer structure + editorial dark theme
+    </footer>
+  </div>
+  <script>
+    document.querySelectorAll(".quiz-card").forEach((card) => {
+      const choices = Array.from(card.querySelectorAll(".quiz-choice"));
+      const feedback = card.querySelector(".quiz-feedback");
+      const label = card.querySelector(".feedback-label");
+      choices.forEach((choice) => {
+        choice.addEventListener("click", () => {
+          const isCorrect = choice.dataset.correct === "true";
+          choices.forEach((button) => {
+            button.classList.toggle("is-correct", button.dataset.correct === "true");
+            button.classList.remove("is-wrong");
+          });
+          if (!isCorrect) {
+            choice.classList.add("is-wrong");
+          }
+          label.textContent = isCorrect ? "正解" : "不正解。正解は緑の選択肢です";
+          feedback.classList.add("is-visible");
+        });
+      });
+    });
+  </script>
+</body>
+</html>

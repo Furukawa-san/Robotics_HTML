@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>実戦ロボティクス8章 ヤコビ行列を利用した制御 内容まとめ</title>
+  <style>
+    :root{--bg:#080808;--paper:#111112;--paper-2:#171719;--ink:#f5f0e8;--muted:#bdb5aa;--dim:#7f786e;--rule:rgba(245,240,232,.16);--accent:#d4a64f;--accent-2:#82b7ff;--ok:#7fd6a3;--bad:#ff9274;--max:1120px}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Gelasio","Times New Roman","Yu Mincho","Hiragino Mincho ProN",serif;line-height:1.82;letter-spacing:0}.page{width:min(var(--max),calc(100vw - 40px));margin:0 auto}
+    header{min-height:72vh;display:grid;align-items:end;padding:76px 0 54px;border-bottom:1px solid var(--rule)}.kicker,.section-label,.quiz-number{color:var(--accent);font-family:"Ubuntu Mono",ui-monospace,monospace;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+    h1{margin:18px 0 0;max-width:980px;font-size:clamp(42px,7.6vw,86px);line-height:.99;font-weight:700;letter-spacing:0}.thesis{max-width:900px;margin-top:30px;font-size:clamp(20px,2.4vw,30px);line-height:1.55;color:var(--ink)}.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}.chip{border:1px solid var(--rule);border-radius:999px;padding:6px 12px;font-family:"Ubuntu Mono",ui-monospace,monospace;color:var(--muted);font-size:13px;background:rgba(255,255,255,.035)}
+    nav{position:sticky;top:0;z-index:3;display:flex;gap:8px;padding:12px 0;margin-bottom:38px;background:rgba(8,8,8,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--rule);overflow-x:auto}nav a{color:var(--muted);text-decoration:none;white-space:nowrap;padding:7px 10px;font-family:"Ubuntu Mono",ui-monospace,monospace;font-size:14px}nav a:hover,nav a:focus-visible{color:var(--ink);outline:none}
+    section{padding:42px 0;border-bottom:1px solid var(--rule)}h2{margin:0 0 24px;font-size:clamp(32px,5vw,56px);line-height:1.08}h3{margin:34px 0 10px;font-size:clamp(22px,3vw,32px);line-height:1.24}h4{margin:26px 0 8px;font-size:21px;color:var(--ink)}h5,h6{margin:22px 0 6px;font-size:18px;color:var(--accent);font-family:"Ubuntu Mono",ui-monospace,monospace}p{margin:0 0 16px;color:var(--muted);font-size:17px}strong{color:var(--ink);font-weight:700}
+    code,.math{color:#d8e9ff;font-family:"Ubuntu Mono",ui-monospace,monospace;background:rgba(127,182,255,.12);border:1px solid rgba(127,182,255,.22);border-radius:4px;padding:0 5px;white-space:nowrap}.dot{position:relative;display:inline-block;padding-top:.2em;line-height:1}.dot::before{content:".";position:absolute;left:50%;top:-.42em;transform:translateX(-50%);font-weight:700;line-height:1}
+    .equation-strip,.summary-grid,.quiz-grid{display:grid;gap:16px}.equation-strip{grid-template-columns:repeat(3,minmax(0,1fr));margin:26px 0 18px}.summary-grid,.quiz-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.equation,.summary-card,.quiz-card,.core-body{border:1px solid var(--rule);border-radius:6px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025))}.equation{padding:16px;overflow-x:auto}.summary-card{padding:24px}.summary-card h3{margin-top:0;color:var(--ink);font-size:24px}
+    .quiz-panel{margin:30px 0 34px;padding:26px;background:linear-gradient(180deg,rgba(127,182,255,.10),rgba(255,255,255,.035));border:1px solid rgba(127,182,255,.24);border-radius:6px}.quiz-card{min-width:0;padding:20px;background:rgba(8,8,8,.48)}.quiz-card h3{margin:8px 0 10px;font-size:21px}.quiz-question{color:var(--ink);font-size:16px;line-height:1.68}.quiz-choices{display:grid;gap:9px;margin-top:14px}.quiz-choice{width:100%;display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;min-height:44px;padding:12px;border:1px solid var(--rule);border-radius:4px;background:rgba(255,255,255,.035);color:var(--muted);font:inherit;font-size:15px;line-height:1.58;text-align:left;cursor:pointer}.quiz-choice:hover,.quiz-choice:focus-visible{border-color:rgba(212,166,79,.7);color:var(--ink);outline:none}.choice-mark{display:inline-grid;place-items:center;width:26px;height:26px;border:1px solid var(--rule);border-radius:50%;color:var(--accent);font-family:"Ubuntu Mono",ui-monospace,monospace;font-size:13px}.quiz-choice.is-correct{border-color:rgba(127,214,163,.7);background:rgba(127,214,163,.10);color:var(--ink)}.quiz-choice.is-wrong{border-color:rgba(255,146,116,.7);background:rgba(255,146,116,.10);color:var(--ink)}.quiz-feedback{display:none;margin-top:14px;padding:14px;border-left:3px solid var(--accent);background:rgba(212,166,79,.08)}.quiz-feedback.is-visible{display:block}.feedback-label{margin-bottom:6px;color:var(--ink);font-family:"Ubuntu Mono",ui-monospace,monospace;font-size:14px;font-weight:700}.quiz-feedback p{margin-bottom:0;font-size:15px;line-height:1.72}
+    .core{background:var(--paper);margin:0 calc(50% - 50vw);padding-left:max(20px,calc((100vw - var(--max))/2));padding-right:max(20px,calc((100vw - var(--max))/2))}.core-inner{max-width:920px}.core-body{margin-top:26px;padding:26px;background:var(--paper-2)}.core-body ul{margin:0 0 18px 1.2em;padding:0;color:var(--muted)}.core-body li{margin:8px 0}.core-body hr{border:0;border-top:1px solid var(--rule);margin:34px 0}footer{padding:34px 0 52px;color:var(--dim);font-family:"Ubuntu Mono",ui-monospace,monospace;font-size:13px}
+    @media(max-width:840px){.page{width:min(100vw - 32px,var(--max))}header{min-height:62vh;padding-top:48px}.summary-grid,.equation-strip,.quiz-grid{grid-template-columns:1fr}.core-body,.quiz-panel{padding:18px}p{font-size:16px}}
+    </style>
+</head>
+<body>
+
+  <div class="page">
+    <header>
+      <div>
+        <div class="kicker">Chapter 8 / Jacobian-Based Control</div>
+        <h1>実戦ロボティクス8章<br>ヤコビ行列を利用した制御</h1>
+        <p class="thesis">ヤコビ行列は、関節の動きを手先・画像・力・柔らかさへ翻訳し、ロボットを環境とやり取りできる制御へ拡張する変換器である。</p>
+        <div class="meta">
+          <span class="chip">visual-html-renderer information design</span>
+          <span class="chip">editorial dark</span>
+          <span class="chip">要約 + コア内容 + 10問クイズ</span>
+          <span class="chip">generated 2026-06-29 20:17</span>
+        </div>
+      </div>
+    </header>
+    <nav aria-label="ページ内ナビゲーション">
+      <a href="#summary">要約</a>
+      <a href="#core">コア内容</a>
+      <a href="#quiz">10問クイズ</a>
+    </nav>
+    <section id="summary">
+      <div class="section-label">Summary</div>
+      <h2>要約</h2>
+      <div class="equation-strip" aria-label="章の主要式">
+        <div class="equation"><span class="math"><span class="dot">r</span>=J<span class="dot">q</span></span></div>
+        <div class="equation"><span class="math">τ=J<sup>T</sup>f</span></div>
+        <div class="equation"><span class="math">τ=-J<sup>T</sup>KJΔ q</span></div>
+      </div>
+      <div class="summary-grid"><article class="summary-card"><h3>分解速度制御</h3><p>手先誤差を直接小さくするため、まず <span class="math"><span class="dot">r</span>-<span class="dot">r</span><sub>d</sub>+K<sub>p</sub>(r-r<sub>d</sub>)=0</span> となるように設計します。</p>
+<p>ヤコビ行列の関係 <span class="math"><span class="dot">r</span>=J<sub>r</sub><span class="dot">q</span></span> と、速度入力 <span class="math"><span class="dot">q</span>=u</span> を使うと、<span class="math">u=J<sub>r</sub><sup>-1</sup>{<span class="dot">r</span><sub>d</sub>-K<sub>p</sub>(r-r<sub>d</sub>)}</span> が得られます。</p>
+<p>物理的には、手先に必要な速度を各関節の速度へ分解して配る制御です。</p></article>
+<article class="summary-card"><h3>画像特徴ベースビジュアルサーボ</h3><p>カメラ画像上の特徴点 <span class="math">i<sub>a</sub>=[i<sub>ax</sub>,i<sub>ay</sub>]<sup>T</sup></span> を目標位置へ近づける制御です。</p>
+<p>画像の点の速度は、カメラ速度と画像ヤコビ行列で <span class="math"><span class="dot">i</span><sub>a</sub>=J<sub>I</sub>[v;ω]</span> と表せます。</p>
+<p>さらに手先速度と関節速度を結ぶロボットヤコビ行列を掛けると、画像のズレから関節速度を直接計算できます。</p></article>
+<article class="summary-card"><h3>仮想仕事の原理</h3><p>関節トルクがする仕事は <span class="math">(δ q)<sup>T</sup>τ</span>、手先力がする仕事は <span class="math">(δ r)<sup>T</sup>f</span> です。</p>
+<p>微小変位の関係 <span class="math">δ r=Jδ q</span> を代入すると、任意の <span class="math">δ q</span> で成り立つため <span class="math">τ=J<sup>T</sup>f</span> が導かれます。</p>
+<p>速度は <span class="math">J</span>、力は <span class="math">J<sup>T</sup></span> で変換されるという双対性が、力制御の土台です。</p></article>
+<article class="summary-card"><h3>コンプライアンス制御</h3><p>コンプライアンスとは、外力に対して手先がばねのように柔らかく動く性質です。</p>
+<p>手先に仮想ばね <span class="math">f=-KΔ r</span> を作りたいとき、仮想仕事の関係から <span class="math">τ=J<sup>T</sup>f=-J<sup>T</sup>KΔ r</span> となります。</p>
+<p><span class="math">Δ r=JΔ q</span> なので、関節側では <span class="math">τ=-J<sup>T</sup>KJΔ q</span> のようにヤコビ行列を含むゲインになります。</p></article>
+<article class="summary-card"><h3>位置と力のハイブリッド制御</h3><p>壁に沿う方向は位置を制御し、壁に押し付ける方向は力を制御するように、方向ごとに役割を分けます。</p>
+<p>選択行列 <span class="math">S</span> は力制御する方向を選び、<span class="math">I-S</span> は位置制御する方向を選びます。</p>
+<p>最終的には位置制御トルク <span class="math">τ<sub>p</sub></span> と力制御トルク <span class="math">τ<sub>f</sub></span> を足して、<span class="math">τ=τ<sub>p</sub>+τ<sub>f</sub></span> とします。</p></article>
+<article class="summary-card"><h3>この章の統一視点</h3><p>ヤコビ行列は、速度だけでなく画像特徴、力、柔らかさ、接触作業の方向分解まで扱う共通の翻訳機です。</p>
+<p>第7章の微分運動学を、カメラで見ながら動く制御、押し付ける力を調整する制御、人や環境と安全に触れる制御へ拡張します。</p>
+<p>式を覚えるより、何を何へ変換しているかを追うと章全体がつながります。</p></article></div>
+    </section>
+  </div>
+  <section class="core" id="core">
+    <div class="page core-inner">
+      <div class="section-label">Core Content</div>
+      <h2>コア内容</h2>
+      <p>提示されたTXTの本文を、意味単位ごとに読みやすくHTML化しています。TXT内の10問と回答は、下の選択式クイズとして再構成しています。</p>
+      <section class="quiz-panel" id="quiz" aria-labelledby="quiz-title">
+        <div class="section-label">Quiz</div>
+        <h2 id="quiz-title">10問クイズ</h2>
+        <p>各問の選択肢を選ぶと、正解と詳細解説が表示されます。ヤコビ行列が何を何へ変換しているかを確認する構成です。</p>
+        <div class="quiz-grid">
+            <article class="quiz-card">
+              <div class="quiz-number">Q01</div>
+              <h3>位置逆運動学と速度ベース制御</h3>
+              <p class="quiz-question">逆運動学を位置で直接解く方法と、ヤコビ行列を使う速度ベース制御の実務上の大きな違いはどれでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q1の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>位置解法は解析解が難しい多自由度ロボットで扱いにくく、速度ベース制御は微小な線形関係を逐次使える。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>速度ベース制御はヤコビ行列を使わないため、特異姿勢の影響を一切受けない。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>位置解法は必ず画像特徴量だけで制御し、速度ベース制御は必ず力センサだけで制御する。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>位置の逆運動学は非線形方程式を直接解くため、複雑なロボットほど解析解が難しくなります。一方、ヤコビ行列を使う分解速度制御は、現在姿勢まわりの微小な速度関係を使って少しずつ目標へ近づけるため、構造が複雑でも共通の数値計算で扱えます。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q02</div>
+              <h3>誤差フィードバックを足す理由</h3>
+              <p class="quiz-question">分解速度制御で、目標速度 <span class="math"><span class="dot">r</span><sub>d</sub></span> だけでなく <span class="math">K<sub>p</sub>(r-r<sub>d</sub>)</span> のような位置誤差項を入れる理由は何ですか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q2の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>計算誤差やサンプリング誤差で生じるドリフトを戻し、目標軌道へ収束させるため。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>位置誤差項を入れると、ロボットの全関節が物理的に消えるため。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>目標速度だけではカメラ画像が保存できないため。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>目標速度だけを積分していくと、小さな誤差が蓄積して手先位置が徐々にずれることがあります。そこで現在の誤差を戻す速度を追加し、<span class="math"><span class="dot">r</span>-<span class="dot">r</span><sub>d</sub>+K<sub>p</sub>(r-r<sub>d</sub>)=0</span> という1次系にして、誤差が自然に0へ近づくようにします。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q03</div>
+              <h3>画像特徴ベース制御</h3>
+              <p class="quiz-question">画像特徴ベース・ビジュアルサーボで、3次元姿勢を完全に推定しなくても制御できる理由はどれでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q3の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>画像上の特徴点速度と関節速度を画像ヤコビ行列で直接結びつけるから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>画像特徴ベース制御ではカメラもロボットも動かさないから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>3次元位置は常に画像の中央に固定されるから。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>IBVSでは、画像上の点のズレそのものを制御対象にします。画像ヤコビ行列は、カメラや手先の動きが画像上の特徴点をどう動かすかを表すので、画像の見え方から直接関節速度を計算できます。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q04</div>
+              <h3>画像ヤコビ行列の特異性</h3>
+              <p class="quiz-question">ビジュアルサーボの特異姿勢は、ロボットアームのリンク構造だけで決まるでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q4の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>決まらない。カメラと対象の相対位置や奥行きによって画像ヤコビ行列のランクが落ちることもある。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>必ずリンク長だけで決まり、カメラの位置や対象の見え方は無関係である。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>特異姿勢はビジュアルサーボでは存在しない。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>画像ヤコビ行列には特徴点の画像座標や奥行きが入ります。そのため、ロボット本体は十分動ける姿勢でも、カメラから対象が見える配置によっては画像特徴の変化が足りず、制御に必要なランクが不足します。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q05</div>
+              <h3>なぜ力では $J^T$ が出るのか</h3>
+              <p class="quiz-question">速度関係 <span class="math"><span class="dot">r</span>=J<span class="dot">q</span></span> に対し、力関係が <span class="math">τ=J<sup>T</sup>f</span> になる理由として正しいのはどれでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q5の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>仮想仕事の原理により、手先での仕事と関節での仕事が等しくなる必要があるから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>転置を取ると、すべての行列が必ず単位行列になるから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>力制御では速度の式を一切使えないから。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>微小変位について <span class="math">δ r=Jδ q</span> です。仕事の等価性 <span class="math">(δ q)<sup>T</sup>τ=(δ r)<sup>T</sup>f</span> に代入すると、<span class="math">(δ q)<sup>T</sup>τ=(δ q)<sup>T</sup>J<sup>T</sup>f</span> となります。任意の <span class="math">δ q</span> で成り立つため <span class="math">τ=J<sup>T</sup>f</span> が導かれます。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q06</div>
+              <h3>位置センサだけで柔らかさを作る</h3>
+              <p class="quiz-question">関節エンコーダしかないロボットで、手先の柔らかさを作れる理由はどれでしょうか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q6の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>手先変位 <span class="math">Δ r</span> をヤコビ行列で関節側へ結び、<span class="math">J<sup>T</sup>KJ</span> を含むトルク指令で仮想ばねを作れるから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>エンコーダは外力を直接ニュートン単位で測れるから。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>柔らかさは機械の材質だけで決まり、制御では変えられない。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>手先の仮想ばねを <span class="math">f=-KΔ r</span> と考え、仮想仕事の式 <span class="math">τ=J<sup>T</sup>f</span> を使えば、その手先力を作る関節トルクを計算できます。さらに <span class="math">Δ r=JΔ q</span> なので、関節角の変化だけから柔らかさを模擬できます。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q07</div>
+              <h3>転置を使うメリット</h3>
+              <p class="quiz-question">コンプライアンス制御で、逆行列ではなく転置 <span class="math">J<sup>T</sup></span> を使うことの計算上の利点は何ですか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q7の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span><span class="math">J<sup>T</sup></span> は常に計算でき、特異姿勢でも逆行列のように発散しにくい。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span><span class="math">J<sup>T</sup></span> を使うと、手先力が必ず0になる。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span><span class="math">J<sup>T</sup></span> はカメラ画像の色を自動で補正する。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>逆行列 <span class="math">J<sup>-1</sup></span> は、特異姿勢やランク不足で存在しなかったり非常に大きくなったりします。一方、転置 <span class="math">J<sup>T</sup></span> はどんな行列にも定義されるため、力や仮想ばねをトルクへ写す計算が数値的に破綻しにくいという利点があります。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q08</div>
+              <h3>選択行列 $S$ の役割</h3>
+              <p class="quiz-question">位置と力のハイブリッド制御で、選択行列 <span class="math">S</span> は何をしていますか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q8の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>作業空間を力制御する方向と位置制御する方向に分ける。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>ロボットの関節数を自動的に増やす。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>ヤコビ行列を使わずに画像特徴点を検出する。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>壁を拭く作業なら、壁に垂直な方向は押し付け力を制御し、壁に沿う方向は位置を制御したい。<span class="math">S</span> は力制御する成分を選び、<span class="math">I-S</span> は位置制御する成分を選ぶため、2つの制御が干渉しにくくなります。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q09</div>
+              <h3>疑似逆行列の暗黙の最適化</h3>
+              <p class="quiz-question">冗長ロボットで疑似逆行列 <span class="math">J<sup>+</sup></span> を使うと、どのような解が暗黙に選ばれますか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q9の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>目標手先速度を実現しつつ、関節速度ノルム <span class="math">||<span class="dot">q</span>||</span> が最小の解。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>必ず全関節速度が最大になる解。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>手先速度を無視して、最も派手に動く解。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>自由度が余ると、同じ手先速度を実現する関節速度は無数にあります。疑似逆行列はその中から、関節速度の二乗和が最小になる解を選びます。無駄な動きが少ない、自然な解を選ぶ性質です。</p>
+              </div>
+            </article>
+            
+
+            <article class="quiz-card">
+              <div class="quiz-number">Q10</div>
+              <h3>LM法の代償</h3>
+              <p class="quiz-question">特異姿勢付近でレーベンバーグ・マルカート法を入れると、どのような代償がありますか。</p>
+              <div class="quiz-choices" role="group" aria-label="Q10の選択肢">
+                <button class="quiz-choice" type="button" data-correct="true"><span class="choice-mark">A</span><span>計算の発散を抑えられる一方、目標軌道への追従精度が少し落ちる。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">B</span><span>すべての誤差が完全に0になり、代償は存在しない。</span></button><button class="quiz-choice" type="button" data-correct="false"><span class="choice-mark">C</span><span>ロボットが画像特徴を一切使えなくなる。</span></button>
+              </div>
+              <div class="quiz-feedback" aria-live="polite">
+                <div class="feedback-label"></div>
+                <p>LM法の減衰項は、逆行列が大きくなりすぎるのを抑えて安全にします。しかし厳密な逆解からは離れるため、手先が目標軌道を完全には追わず、少しずれることがあります。安定性と精度のトレードオフです。</p>
+              </div>
+            </article>
+            </div>
+      </section>
+      <div class="core-body"><p>『実戦ロボット制御』第8章「ヤコビ行列を利用した制御」に基づき、この分野の専門家が実務で共有している5つの核となるメンタルモデル（思考の枠組み）を、実用的な知識とともに解説します。</p>
+<h5>1. 「速度の橋渡し」としてのヤコビ行列（分解速度制御）</h5>
+<p>専門家は、手先の目標軌道（作業座標系）を関節の指令値へと変換する際、位置の逆運動学を直接解くのではなく、<strong>「速度の連鎖」</strong>として捉えます。</p>
+<ul>
+<li><strong>実務的知識</strong>: 手先の目標速度 <span class="math"><span class="dot">r</span><sub>d</sub></span> に現在の誤差を修正する項を加えた「修正目標速度」を定義し、ヤコビ行列 <span class="math">J</span> の逆行列（または擬似逆行列）を掛けることで、各関節の速度指令 <span class="math">u = <span class="dot">q</span></span> を逐次的に算出します。これにより、複雑な逆運動学の解を事前に求める必要がなくなります。</li>
+</ul>
+<h5>2. 「見え方」を直接制御する（画像特徴ベースビジュアルサーボ）</h5>
+<p>カメラ画像を用いる際、ロボットの姿勢を推定してから動かすのではなく、<strong>「画像内の特徴点の動き」と「関節の動き」をヤコビ行列で直結</strong>させる思考枠組みです。</p>
+<ul>
+<li><strong>実務的知識</strong>: 「画像ヤコビ行列」を用いることで、画像上での目標位置への収束特性を直接設計できます。ただし、画像ヤコビ行列のランクが不足する「特異姿勢」は、ロボットの構造だけでなくカメラとの位置関係でも発生するため、実務では注意が必要です。</li>
+</ul>
+<h5>3. 「動き」と「力」の双対性（仮想仕事の原理）</h5>
+<p>関節の速度と手先の速度をつなぐヤコビ行列は、同時に<strong>「手先の力」と「関節トルク」をつなぐ架け橋</strong>でもあるという、物理的な双対性のモデルです。</p>
+<ul>
+<li><strong>実務的知識</strong>: 手先に生じさせたい力・モーメント <span class="math">f</span> が決まれば、ヤコビ行列の転置 <span class="math">J<sup>T</sup></span> を用いて、必要な関節トルクを <span class="math">τ = J<sup>T</sup> f</span> として即座に計算できます。これは力制御を行う際の最も基本的な計算式です。</li>
+</ul>
+<h5>4. 「仮想的なバネ」の実装（コンプライアンス制御）</h5>
+<p>ロボットの手先が外部から押された際、どのように「いなす」かを、<strong>ヤコビ行列を介したフィードバックゲインの設計</strong>として捉えるモデルです。</p>
+<ul>
+<li><strong>実務的知識</strong>: フィードバックゲインにヤコビ行列を含めることで、手先に仮想的なバネ特性（コンプライアンス）を持たせることができます。これにより、人間との接触や環境との干渉がある作業でも、ロボットが壊れたり過剰な力を出したりするのを防げます。</li>
+</ul>
+<h5>5. 「空間の役割分担」による協調（位置と力のハイブリッド制御）</h5>
+<p>壁に沿って動くような作業では、作業空間を<strong>「位置を制御する方向」と「力を制御する方向」に直交分解</strong>して考える思考枠組みです。</p>
+<ul>
+<li><strong>実務的知識</strong>: 選択行列 <span class="math">S</span> を用いて、壁に垂直な方向には力制御を、壁に平行な方向には位置制御を割り当てます。ヤコビ行列を用いてこれらを統合することで、未知の段差がある壁面でも、一定の力で押し付けながら正確に移動するような高度な作業が可能になります。</li>
+</ul>
+<p>これらのモデルを使い分けることで、専門家は「ロボットを単に動かす」段階から、<strong>「環境とやり取りしながら、目的に応じた柔らかさや力を発揮させる」</strong>実装へとステップアップします。</p>
+<p>『実戦ロボット制御』第8章「ヤコビ行列を利用した制御」の内容を深く理解するために不可欠な専門用語を、トピックごとに分類して列挙します。</p>
+<h5>1. 速度制御と軌道追従に関する用語</h5>
+<p>ヤコビ行列を用いて、作業座標系での目標軌道を関節の動きに変換するための基礎用語です。</p>
+<ul>
+<li><strong>分解速度制御 (Resolved Motion Rate Control)</strong>: 手先の目標速度を各関節の速度指令に「分解」して与える制御手法。</li>
+<li><strong>修正目標速度</strong>: 現在の手先の位置・姿勢の誤差を解消するために、本来の目標速度にフィードバック項を加えた速度。</li>
+<li><strong>レーベンバーグ・マルカート法 (Levenberg-Marquardt method)</strong>: 特異姿勢付近でヤコビ行列の逆行列が不安定になるのを防ぐために、減衰項を加えて計算を安定化させる数値解法。</li>
+<li>**フィードバックゲイン (<span class="math">K<sub>p</sub></span>)**: 目標軌道との誤差をどの程度の強さで修正するかを決定する定数行列。</li>
+</ul>
+<h5>2. ビジュアルサーボに関する用語</h5>
+<p>カメラ情報を直接制御ループに組み込むための用語です。</p>
+<ul>
+<li><strong>ビジュアルサーボ (Visual Servo)</strong>: カメラで観測される画像情報をフィードバックしてロボットを制御する技術。</li>
+<li><strong>位置ベース・ビジュアルサーボ</strong>: 画像から対象物の3次元位置・姿勢を推定し、それを目標値とする手法。</li>
+<li><strong>画像特徴ベース・ビジュアルサーボ</strong>: 画像内の点や線の座標などの「画像特徴量」を、画像平面上で直接目標値に一致させる手法。</li>
+<li><strong>画像特徴量</strong>: 画像内で観測される注目点の座標、面積、線分の長さなどの情報。</li>
+<li><strong>画像ヤコビ行列 (Interaction Matrix)</strong>: ロボット（カメラ）の速度と、画像上での特徴点の移動速度を結びつける行列。</li>
+<li><strong>ティーチング・バイ・ショウイング (Teaching by showing)</strong>: 望みの位置での画像をあらかじめ記録しておき、その画像特徴量に一致するように制御する実用的な手法。</li>
+</ul>
+<h5>3. 力とトルクの双対性に関する用語</h5>
+<p>静力学的な関係を理解するための物理的な概念です。</p>
+<ul>
+<li><strong>仮想仕事の原理</strong>: 外部から加えられる力による仕事と、内部の関節トルクによる仕事が等しいという原理。ヤコビ行列の転置と力の関係を導く基礎となる。</li>
+<li><strong>力・モーメント</strong>: ロボットの手先に作用する押し付ける力と、回転させようとする力。</li>
+<li><strong>仮想変位</strong>: 均衡状態からわずかに動かしたと仮定する、無限小の変位。</li>
+</ul>
+<h5>4. 環境との接触制御に関する用語</h5>
+<p>ロボットに「柔らかさ」や「力の加減」を持たせるための用語です。</p>
+<ul>
+<li><strong>コンプライアンス制御 (Compliance Control)</strong>: 外力に対して手先がバネのように柔軟に反応するようにトルクを制御する手法。</li>
+<li><strong>インピーダンス制御 (Impedance Control)</strong>: 手先の慣性（質量）、粘性（ダンパ）、弾性（バネ）を仮想的に作り出し、動的な特性を自在に変更する制御。</li>
+<li><strong>位置と力のハイブリッド制御</strong>: 壁への押し付け（力制御）と、壁に沿った移動（位置制御）のように、方向によって制御モードを切り替える手法。</li>
+<li><strong>拘束面</strong>: ロボットの手先が接触しており、移動が制限されている面。</li>
+<li>**選択行列 (<span class="math">S</span>)**: どの方向に力制御を行い、どの方向に位置制御を行うかを決定するための行列。</li>
+</ul>
+<p>これらの用語は、単なる定義としてだけでなく、<strong>「ヤコビ行列（またはその転置や逆行列）が、作業空間と関節空間の何を橋渡ししているか」</strong>という視点で結びつけると、より深い理解が得られます。</p>
+<p>『実戦ロボット制御』第8章の内容に基づき、ロボット制御の専門家の間でアプローチが分かれる、あるいは設計思想として対立する3つの主要なポイントと、それぞれの主張を解説します。</p>
+<p>これらの対立は、多くの場合「計算の簡便さ・堅牢性」と「精緻な幾何学的理解」のどちらを優先するかというトレードオフから生じています。</p>
+<hr>
+<h5>1. 逆運動学の解法：幾何学的解法 vs. 速度ベース（ヤコビ行列）解法</h5>
+<p>ロボットの手先を目標位置へ動かす際、関節角度を直接求めるか、速度の積み重ねで制御するかという対立です。</p>
+<ul>
+<li><strong>幾何学的解法（位置ベース）陣営</strong></li>
+<ul>
+<li><strong>強力な主張</strong>: 「手先の位置 <span class="math">r</span> から関節角度 <span class="math">q</span> を直接導き出すべきである」。一度解（公式）を導出できれば、現在の姿勢に関わらず目標位置へ一足飛びに、かつ正確に移動できる。</li>
+<li><strong>実務上の懸念</strong>: ロボットが複雑になると、非線形連立方程式を解くのが非常に困難になる。</li>
+</ul>
+<li><strong>速度ベース（ヤコビ行列）陣営</strong></li>
+<ul>
+<li><strong>強力な主張</strong>: 「逆運動学を解く必要はない。ヤコビ行列の逆行列を用いて、微小な速度指令を逐次与えればよい（分解速度制御）」。</li>
+<li><strong>利点</strong>: どんな複雑な構造のロボットでも共通のアルゴリズムで動かせ、計算負荷が低い。ただし、特異姿勢付近での不安定化（レーベンバーグ・マルカート法などの対策が必要）が課題となる。</li>
+</ul>
+</ul>
+<h5>2. ビジュアルサーボの戦略：位置ベース (PBVS) vs. 画像特徴ベース (IBVS)</h5>
+<p>カメラ画像を使って制御する際、3次元空間を復元するか、画像上の動きだけで押し通すかという対立です。</p>
+<ul>
+<li><strong>位置ベース (PBVS) 陣営</strong></li>
+<ul>
+<li><strong>強力な主張</strong>: 「画像から対象の3次元位置・姿勢を推定し、作業空間（3次元）で制御を設計すべきである」。ロボットの動きが直感的で、3次元的な軌道計画との相性が良い。</li>
+</ul>
+<li><strong>画像特徴ベース (IBVS) 陣営</strong></li>
+<ul>
+<li><strong>強力な主張</strong>: 「3次元復元は誤差の元である。画像上の特徴点の座標変化と関節速度を画像ヤコビ行列で直結し、画像平面上で直接制御すべきである」。</li>
+<li><strong>利点</strong>: カメラのキャリブレーション誤差に強く、堅牢である。一方で、画像上での目標達成と引き換えに、3次元空間でのロボットの挙動が予測しにくくなる（遠回りするなど）リスクがある。</li>
+</ul>
+</ul>
+<h5>3. 環境接触の制御：コンプライアンス（柔らかさ）制御 vs. ハイブリッド制御</h5>
+<p>壁に触れるなどの作業時、全体を「柔らかく」するか、方向ごとに「位置と力」を厳密に分けるかという対立です。</p>
+<ul>
+<li><strong>コンプライアンス（インピーダンス）制御陣営</strong></li>
+<ul>
+<li><strong>強力な主張</strong>: 「全ての方向に対して仮想的なバネ・ダンパ特性を持たせるべきである」。環境の形が正確にわからなくても、接触時の衝撃を吸収し、安全に作業を継続できる。</li>
+</ul>
+<li><strong>位置と力のハイブリッド制御陣営</strong></li>
+<ul>
+<li><strong>強力な主張</strong>: 「作業空間を『位置を制御する方向』と『力を制御する方向』に直交分解し、それぞれに最適なゲインを割り当てるべきである（選択行列 <span class="math">S</span> の使用）」。</li>
+<li><strong>利点</strong>: 壁を一定の力で正確に押しながら、横方向に正確に移動するといった、精緻な作業が可能になる。ただし、環境の幾何学的な「拘束面」を事前に正確に把握している必要がある。</li>
+</ul>
+</ul>
+<hr>
+<p>これらの対立点は、どちらかが間違っているわけではなく、<strong>「未知の環境での柔軟性を取るか（ヤコビ・画像・コンプライアンス）」「既知の環境での精度を取るか（幾何・位置・ハイブリッド）」</strong>という、実務における目的の違いを反映しています。</p></div>
+    </div>
+  </section>
+  <div class="page">
+    <footer>
+      Source: C:\Users\furuk\Desktop\実戦ロボティクス8章.txt<br>
+      Output variant: editorial dark
+    </footer>
+  </div>
+
+
+  <script>
+    document.querySelectorAll(".quiz-card").forEach((card) => {
+      const choices = Array.from(card.querySelectorAll(".quiz-choice"));
+      const feedback = card.querySelector(".quiz-feedback");
+      const label = card.querySelector(".feedback-label");
+      choices.forEach((choice) => {
+        choice.addEventListener("click", () => {
+          const isCorrect = choice.dataset.correct === "true";
+          choices.forEach((button) => {
+            button.classList.toggle("is-correct", button.dataset.correct === "true");
+            button.classList.remove("is-wrong");
+          });
+          if (!isCorrect) choice.classList.add("is-wrong");
+          label.textContent = isCorrect ? "正解" : "不正解。正解は緑の選択肢です";
+          feedback.classList.add("is-visible");
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>
