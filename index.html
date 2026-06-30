@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>実戦ロボティクス HTMLまとめ</title>
+  <style>
+    :root {
+      --bg: #080808;
+      --paper: #111112;
+      --paper-2: #171719;
+      --ink: #f5f0e8;
+      --muted: #bdb5aa;
+      --dim: #827a70;
+      --rule: rgba(245, 240, 232, .16);
+      --accent: #d4a64f;
+      --accent-2: #82b7ff;
+      --ok: #7fd6a3;
+      --max: 1040px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        linear-gradient(135deg, rgba(212, 166, 79, .12), transparent 34rem),
+        radial-gradient(circle at 92% 10%, rgba(130, 183, 255, .12), transparent 28rem),
+        var(--bg);
+      color: var(--ink);
+      font-family: "Gelasio", "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif;
+      line-height: 1.72;
+      letter-spacing: 0;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      width: min(var(--max), calc(100vw - 40px));
+      margin: 0 auto;
+      padding: 64px 0 56px;
+    }
+
+    header {
+      padding: 34px 0 40px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .kicker,
+    .chapter,
+    .variant {
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .kicker {
+      color: var(--accent);
+      font-size: 13px;
+    }
+
+    h1 {
+      max-width: 820px;
+      margin: 16px 0 0;
+      font-size: clamp(42px, 7vw, 78px);
+      line-height: 1;
+    }
+
+    .lead {
+      max-width: 760px;
+      margin: 24px 0 0;
+      color: var(--muted);
+      font-size: clamp(17px, 2.2vw, 22px);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 34px;
+    }
+
+    .card {
+      display: grid;
+      gap: 14px;
+      min-height: 210px;
+      padding: 22px;
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .058), rgba(255, 255, 255, .026));
+      transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+    }
+
+    .card:hover,
+    .card:focus-visible {
+      border-color: rgba(212, 166, 79, .72);
+      background: linear-gradient(180deg, rgba(255, 255, 255, .084), rgba(255, 255, 255, .035));
+      outline: none;
+      transform: translateY(-2px);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .chapter {
+      color: var(--accent);
+      font-size: 13px;
+    }
+
+    .variant {
+      border: 1px solid rgba(130, 183, 255, .28);
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: var(--accent-2);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: clamp(23px, 3vw, 32px);
+      line-height: 1.18;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .open-label {
+      align-self: end;
+      color: var(--ok);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      font-size: 13px;
+    }
+
+    footer {
+      margin-top: 34px;
+      padding-top: 18px;
+      border-top: 1px solid var(--rule);
+      color: var(--dim);
+      font-family: "Ubuntu Mono", ui-monospace, monospace;
+      font-size: 13px;
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        width: min(100vw - 28px, var(--max));
+        padding-top: 42px;
+      }
+
+      header {
+        padding-top: 20px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        min-height: 184px;
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div class="kicker">Robotics Study Index</div>
+      <h1>実戦ロボティクス<br>HTMLまとめ</h1>
+      <p class="lead">各章のまとめページへ移動するための目次です。GitHub Pages上でも同じフォルダ内のHTMLへそのままリンクします。</p>
+    </header>
+
+    <section class="grid" aria-label="章別リンク">
+      <a class="card" href="./ロボティクス6章.html">
+        <div class="card-top">
+          <span class="chapter">Chapter 6</span>
+          <span class="variant">HTML</span>
+        </div>
+        <h2>ロボティクス6章</h2>
+        <p>6章の内容まとめページを開きます。</p>
+        <span class="open-label">Open chapter →</span>
+      </a>
+
+      <a class="card" href="./実戦ロボティクス7章_微分運動学.html">
+        <div class="card-top">
+          <span class="chapter">Chapter 7</span>
+          <span class="variant">Differential Kinematics</span>
+        </div>
+        <h2>微分運動学</h2>
+        <p>ヤコビ行列に入る前の速度・微小変位の関係を扱う章です。</p>
+        <span class="open-label">Open chapter →</span>
+      </a>
+
+      <a class="card" href="./実戦ロボティクス8章_ヤコビ行列を利用した制御_editorial.html">
+        <div class="card-top">
+          <span class="chapter">Chapter 8</span>
+          <span class="variant">Editorial</span>
+        </div>
+        <h2>ヤコビ行列を利用した制御</h2>
+        <p>Editorial dark デザイン版を開きます。</p>
+        <span class="open-label">Open chapter →</span>
+      </a>
+
+      <a class="card" href="./実戦ロボティクス8章_ヤコビ行列を利用した制御_vibrant-garden.html">
+        <div class="card-top">
+          <span class="chapter">Chapter 8</span>
+          <span class="variant">Vibrant Garden</span>
+        </div>
+        <h2>ヤコビ行列を利用した制御</h2>
+        <p>Vibrant Garden デザイン版を開きます。</p>
+        <span class="open-label">Open chapter →</span>
+      </a>
+
+      <a class="card" href="./ロボティクス9章new.html">
+        <div class="card-top">
+          <span class="chapter">Chapter 9</span>
+          <span class="variant">New</span>
+        </div>
+        <h2>ロボティクス9章</h2>
+        <p>9章の新しいまとめページを開きます。</p>
+        <span class="open-label">Open chapter →</span>
+      </a>
+
+      <a class="card" href="./実戦ロボティクス10章_運動方程式とロボット制御.html">
+        <div class="card-top">
+          <span class="chapter">Chapter 10</span>
+          <span class="variant">Dynamics</span>
+        </div>
+        <h2>運動方程式とロボット制御</h2>
+        <p>ニュートン・オイラー、運動方程式、ロボット制御のまとめを開きます。</p>
+        <span class="open-label">Open chapter →</span>
+      </a>
+    </section>
+
+    <footer>
+      GitHub Pages index for the chapter HTML files in this folder.
+    </footer>
+  </main>
+</body>
+</html>
